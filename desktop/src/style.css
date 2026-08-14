@@ -1,0 +1,570 @@
+:root {
+  --bg: #f4f6f9;
+  --card: #ffffff;
+  --border: #e2e6ec;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --primary: #2563eb;
+  --primary-soft: #eff6ff;
+  --green: #059669;
+  --red: #dc2626;
+  --radius: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Microsoft YaHei', 'PingFang SC', 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.topbar h1 {
+  font-size: 20px;
+  margin: 0;
+}
+
+nav {
+  display: flex;
+  gap: 8px;
+}
+
+nav button {
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text);
+}
+
+nav button.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.card h2 {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+label.field span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+input[type='number'],
+select {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  width: 100%;
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.segmented button {
+  border: none;
+  background: var(--card);
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.segmented button.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--border);
+  padding: 9px 8px;
+  text-align: right;
+}
+
+th {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+td:first-child,
+th:first-child {
+  text-align: left;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.summary .card {
+  margin: 0;
+  text-align: center;
+}
+
+.summary .label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.summary .value {
+  font-size: 22px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.green {
+  color: var(--green);
+}
+
+.red {
+  color: var(--red);
+}
+
+.note {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.band {
+  display: inline-block;
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 13px;
+}
+
+.band-range {
+  color: var(--muted);
+  font-size: 13px;
+  margin-left: 4px;
+}
+
+.band-help {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  cursor: help;
+  color: var(--primary);
+  font-size: 14px;
+}
+
+.band-help-tip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  background: #1f2937;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.8;
+  white-space: pre;
+  z-index: 20;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.band-help:hover .band-help-tip,
+.band-help:focus .band-help-tip {
+  display: block;
+}
+
+/* 试算页顶部输入：月工资 + 参保类型 + 户籍 + 医保档次 至少四列 */
+.calc-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+}
+
+.wage-input {
+  width: 140px;
+  max-width: 100%;
+}
+
+.field .segmented {
+  align-self: flex-start;
+}
+
+.injury-row {
+  margin-top: 12px;
+}
+
+.injury-select {
+  width: 100%;
+}
+
+/* 工伤行业类别：两行显示的自定义下拉框 */
+.select-box {
+  position: relative;
+}
+
+.select-box-display {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 58px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.select-box-text {
+  flex: 1;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.select-box-arrow {
+  flex: none;
+  color: var(--muted);
+  margin-top: 2px;
+  font-size: 11px;
+}
+
+.select-box-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-height: 55vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.select-box-option {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+}
+
+.select-box-option:last-child {
+  border-bottom: none;
+}
+
+.select-box-option:hover {
+  background: var(--primary-soft);
+}
+
+.select-box-option.selected {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* 工伤类别名称手动编辑 */
+.injury-class-label {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.injury-name-input {
+  width: 100%;
+  resize: vertical;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  font-family: inherit;
+}
+
+/* 依据行：访问按钮 */
+.basis-visit {
+  border: 1px solid var(--border);
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.actions button {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.actions button.primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.links a {
+  display: block;
+  margin: 6px 0;
+  color: var(--primary);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.links a:hover {
+  text-decoration: underline;
+}
+
+.version {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.version input {
+  flex: 1;
+}
+
+.basis {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  font-size: 13px;
+}
+
+.basis-label {
+  color: var(--muted);
+}
+
+.basis a {
+  color: var(--primary);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.basis a:hover {
+  text-decoration: underline;
+}
+
+/* 政策参数页：每个险种类别按输入内容长短自动排布，至少 4 列 */
+.param-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 14px 18px;
+}
+
+.injury-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 12px;
+}
+
+.injury-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.injury-name {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* 费率输入框：数字 + 固定 % 后缀 */
+.rate-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rate-input input {
+  flex: 1;
+  min-width: 0;
+}
+
+.rate-suffix {
+  color: var(--muted);
+  font-weight: 600;
+  flex: none;
+}
+
+/* 依据链接编辑：名称 | 网址 | 发布时间 | 访问 | 删除 */
+.basis-grid {
+  display: grid;
+  grid-template-columns: minmax(150px, 1.1fr) minmax(200px, 1.6fr) 150px auto auto;
+  gap: 6px 8px;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 6px;
+}
+
+.basis-publish-header {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.basis-name-input,
+.basis-url-input,
+.basis-date-input {
+  padding: 6px 8px;
+  font-size: 13px;
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.basis-del {
+  border: 1px solid #f3c1c1;
+  background: #fef2f2;
+  color: var(--red);
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.basis-add {
+  border: 1px dashed var(--primary);
+  background: transparent;
+  color: var(--primary);
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.saved-tip {
+  color: var(--green);
+  font-weight: 600;
+  margin-left: 12px;
+}
+
+/* 分类标题右侧：有效期 / 发布时间 */
+.card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.card-head h2 {
+  margin: 0;
+}
+
+.period-fields {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.mini {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.mini input[type='date'] {
+  padding: 6px 8px;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  width: 160px;
+  color: var(--text);
+}
+
+.period-label {
+  color: var(--green);
+  font-weight: 600;
+}
+
+.basis-date-input {
+  font-size: 14px;
+}

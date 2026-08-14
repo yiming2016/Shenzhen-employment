@@ -1,0 +1,48 @@
+{
+  "name": "shenzhen-shebao-calculator",
+  "version": "0.9.0",
+  "description": "深圳社保成本计算器（桌面 EXE，逻辑可复用于手机 App）",
+  "author": "local",
+  "private": true,
+  "main": "desktop/main.js",
+  "scripts": {
+    "build:core": "tsc -p tsconfig.core.json",
+    "test": "npm run build:core && node --test",
+    "dev": "vite --config desktop/vite.config.ts",
+    "build:renderer": "vite build --config desktop/vite.config.ts",
+    "build": "npm run build:core && npm run build:renderer",
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder --win portable"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.0",
+    "electron": "^37.2.0",
+    "electron-builder": "^26.0.12",
+    "typescript": "^5.8.3",
+    "vite": "^7.0.0",
+    "vue": "^3.5.17"
+  },
+  "build": {
+    "appId": "com.local.szshebao",
+    "productName": "深圳社保计算器",
+    "artifactName": "SZ-Shebao-Calculator-${version}-portable.exe",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "desktop/main.js",
+      "desktop/preload.js",
+      "desktop/dist/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
+  }
+}
