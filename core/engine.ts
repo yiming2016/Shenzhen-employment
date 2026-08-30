@@ -82,6 +82,15 @@ export function calculate(
   const wage = input.wage;
   const band = resolveBand(wage, params);
   const items: InsuranceItem[] = [];
+  const flexibleInsurance =
+    input.participationType === 'flexible'
+      ? input.flexibleInsurance ?? {
+          pension: true,
+          medical: true,
+          unemployment: false,
+          housingFund: false,
+        }
+      : null;
 
   // ---------- 养老保险 ----------
   const pensionBase = clamp(wage, params.pension.baseMin, params.pension.baseMax);
@@ -91,7 +100,7 @@ export function calculate(
         ? params.pension.companyRateDeep
         : params.pension.companyRateNonDeep;
     items.push(item('pension', '养老', pensionBase, params.pension.personalRate, companyRate));
-  } else {
+  } else if (flexibleInsurance && flexibleInsurance.pension) {
     const personalRate =
       input.household === 'deep'
         ? params.pension.flexibleRateDeep
@@ -118,16 +127,14 @@ export function calculate(
     items.push(
       item('medical', `医保（${tier}档）`, medicalBase, rates.personalRate, rates.companyRate),
     );
-  } else {
+  } else if (flexibleInsurance && flexibleInsurance.medical) {
     items.push(item('medical', '医保（灵活就业）', medicalBase, params.medical.flexibleRate, 0));
   }
 
   // ---------- 生育保险（个人不缴，灵活就业不缴） ----------
-  const maternityBase = clamp(wage, params.maternity.baseMin, params.maternity.baseMax);
   if (input.participationType === 'employee') {
+    const maternityBase = clamp(wage, params.maternity.baseMin, params.maternity.baseMax);
     items.push(item('maternity', '生育', maternityBase, 0, params.maternity.companyRate));
-  } else {
-    items.push(item('maternity', '生育', 0, 0, 0, '灵活就业不缴纳'));
   }
 
   // ---------- 失业保险 ----------
@@ -147,7 +154,7 @@ export function calculate(
         params.unemployment.companyRate,
       ),
     );
-  } else {
+  } else if (flexibleInsurance && flexibleInsurance.unemployment) {
     items.push(
       item('unemployment', '失业（灵活就业）', unemploymentBase, params.unemployment.flexibleRate, 0),
     );
@@ -159,23 +166,32 @@ export function calculate(
     items.push(
       item('injury', `工伤（${input.injuryClass}类）`, wage, params.injury.personalRate, companyRate),
     );
-  } else {
-    items.push(item('injury', '工伤', 0, 0, 0, '灵活就业不缴纳'));
   }
 
   // ---------- 住房公积金（比例可自行调整） ----------
   if (input.participationType === 'employee') {
+    const hf = input.housingFund;
     items.push(
       item(
         'housingFund',
         '公积金',
-        wage,
-        params.housingFund.personalRate,
-        params.housingFund.companyRate,
+        hf ? Math.max(0, hf.base) : wage,
+        hf ? hf.personalRate : params.housingFund.personalRate,
+        hf ? hf.companyRate : params.housingFund.companyRate,
       ),
     );
-  } else {
-    items.push(item('housingFund', '公积金', 0, 0, 0, '灵活就业不缴纳'));
+  } else if (
+    input.flexibleHousingFund &&
+    flexibleInsurance &&
+    flexibleInsurance.housingFund &&
+    input.flexibleHousingFund.rate > 0 &&
+    input.flexibleHousingFund.base > 0
+  ) {
+    const base = Math.max(0, input.flexibleHousingFund.base);
+    const rate = input.flexibleHousingFund.rate;
+    items.push(
+      item('housingFund', '公积金（灵活就业）', base, rate, 0, '个人自愿缴存'),
+    );
   }
 
   const personalTotal = items.reduce((sum, it) => sum + it.personalAmount, 0);
@@ -191,6 +207,55 @@ export function calculate(
     bandFrom: band.bandFrom,
     bandTo: band.bandTo,
   };
+}
+
+/**
+ * 反解月工资：给定目标"到手工资"，返回满足条件的月工资。
+ * 到手工资 = 工资 - 个人社保合计，随工资严格单调递增（个人费率合计 < 100%），
+ * 因此可以用二分法求反函数，结果与正算共用同一套 calculate 逻辑，不会出现两套规则。
+ */
+export function findWageByNet(
+  targetNetWage: number,
+  input: CalcInput,
+  params: InsuranceParams = DEFAULT_PARAMS,
+): number {
+  return invertMonotonic(
+    (w) => calculate({ ...input, wage: w }, params).netWage,
+    targetNetWage,
+  );
+}
+
+/**
+ * 反解月工资：给定目标"用工成本"，返回满足条件的月工资。
+ * 用工成本 = 工资 + 公司社保合计，随工资严格单调递增（公司费率合计 > -100%），可用二分法求反函数。
+ */
+export function findWageByCost(
+  targetEmploymentCost: number,
+  input: CalcInput,
+  params: InsuranceParams = DEFAULT_PARAMS,
+): number {
+  return invertMonotonic(
+    (w) => calculate({ ...input, wage: w }, params).employmentCost,
+    targetEmploymentCost,
+  );
+}
+
+/** 单调递增函数求反（二分法）；目标低于 f(0) 时返回 0 */
+function invertMonotonic(f: (w: number) => number, target: number): number {
+  const LO = 0;
+  const HI = 100000000; // 1 亿，覆盖正常工资范围
+  const fLo = f(LO);
+  const fHi = f(HI);
+  if (target <= fLo) return LO;
+  if (target >= fHi) return HI;
+  let lo = LO;
+  let hi = HI;
+  for (let i = 0; i < 80; i++) {
+    const mid = (lo + hi) / 2;
+    if (f(mid) < target) lo = mid;
+    else hi = mid;
+  }
+  return (lo + hi) / 2;
 }
 
 export { DEFAULT_PARAMS } from './params';

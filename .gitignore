@@ -3,3 +3,6 @@ desktop/dist/
 dist/
 release/
 *.log
+debug/
+/main.js
+desktop/smoke.png

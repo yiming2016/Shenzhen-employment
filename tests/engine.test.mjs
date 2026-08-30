@@ -3,7 +3,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 const require = createRequire(import.meta.url);
-const { calculate, DEFAULT_PARAMS } = require('../dist/core/engine.js');
+const {
+  calculate,
+  findWageByNet,
+  findWageByCost,
+  DEFAULT_PARAMS,
+} = require('../dist/core/engine.js');
 
 function closeTo(actual, expected, tolerance = 1e-9) {
   assert.ok(
@@ -55,12 +60,12 @@ for (const c of employeeCases) {
   });
 }
 
-// 灵活就业（Excel 中 深户/非深户 灵活就业只缴养老 + 医保 + 失业）
+// 灵活就业（默认只缴养老 + 医保）
 const flexibleCases = [
-  { wage: 3000, household: 'deep', personalTotal: 0.21 * 4775 + 0.08 * 6733 + 0.01 * 3000 },
-  { wage: 3000, household: 'non-deep', personalTotal: 0.2 * 4775 + 0.08 * 6733 + 0.01 * 3000 },
-  { wage: 5000, household: 'deep', personalTotal: 0.21 * 5000 + 0.08 * 6733 + 0.01 * 5000 },
-  { wage: 45000, household: 'deep', personalTotal: 0.21 * 27549 + 0.08 * 33666 + 0.01 * 45000 },
+  { wage: 3000, household: 'deep', personalTotal: 0.21 * 4775 + 0.08 * 6733 },
+  { wage: 3000, household: 'non-deep', personalTotal: 0.2 * 4775 + 0.08 * 6733 },
+  { wage: 5000, household: 'deep', personalTotal: 0.21 * 5000 + 0.08 * 6733 },
+  { wage: 45000, household: 'deep', personalTotal: 0.21 * 27549 + 0.08 * 33666 },
 ];
 
 for (const c of flexibleCases) {
@@ -140,6 +145,126 @@ test('失业基数下限跟随最低工资', () => {
   closeTo(unemployment.base, 2600);
   closeTo(unemployment.personalAmount, 2600 * 0.002);
   closeTo(unemployment.companyAmount, 2600 * 0.008);
+});
+
+// 反解：给定到手工资求月工资，再正算回去必须一致
+test('反解到手工资：4205.34 元对应月工资 5000 元', () => {
+  const base = makeInput({ wage: 5000 });
+  const w = findWageByNet(4205.34, base);
+  closeTo(w, 5000, 1e-6);
+  closeTo(calculate({ ...base, wage: w }).netWage, 4205.34, 1e-3);
+});
+
+test('反解用工成本：6591.645 元对应月工资 5000 元', () => {
+  const base = makeInput({ wage: 5000 });
+  const w = findWageByCost(6591.645, base);
+  closeTo(w, 5000, 1e-6);
+  closeTo(calculate({ ...base, wage: w }).employmentCost, 6591.645, 1e-3);
+});
+
+// 多组目标值往返校验（深户一档 / 非深户二档）
+test('反解与正算往返一致（深户一档）', () => {
+  const base = makeInput({ wage: 5000, household: 'deep', medicalTier: 1 });
+  for (const target of [1000, 4205.34, 10000, 30000, 50000, 100000]) {
+    const w = findWageByNet(target, base);
+    closeTo(calculate({ ...base, wage: w }).netWage, target, 1e-3);
+  }
+  for (const target of [3000, 6591.645, 10000, 30000, 60000, 120000]) {
+    const w = findWageByCost(target, base);
+    closeTo(calculate({ ...base, wage: w }).employmentCost, target, 1e-3);
+  }
+});
+
+test('反解与正算往返一致（非深户二档）', () => {
+  const base = makeInput({ wage: 7000, household: 'non-deep', medicalTier: 2 });
+  for (const target of [2000, 6041, 15000, 40000]) {
+    const w = findWageByNet(target, base);
+    closeTo(calculate({ ...base, wage: w }).netWage, target, 1e-3);
+  }
+  for (const target of [4000, 8685.6, 18000, 45000]) {
+    const w = findWageByCost(target, base);
+    closeTo(calculate({ ...base, wage: w }).employmentCost, target, 1e-3);
+  }
+});
+
+// 目标值低于可行下限时返回 0（工资为 0 仍需缴最低社保）
+test('反解不可行目标返回 0', () => {
+  const base = makeInput({ wage: 5000 });
+  closeTo(findWageByNet(-1000, base), 0);
+  closeTo(findWageByCost(1000, base), 0);
+});
+
+// 灵活就业可选择缴存公积金，基数与工资隔离
+test('灵活就业可选择公积金且基数与工资隔离', () => {
+  const result = calculate(
+    makeInput({
+      wage: 5000,
+      participationType: 'flexible',
+      flexibleHousingFund: { base: 3000, rate: 0.08 },
+      flexibleInsurance: {
+        pension: true,
+        medical: true,
+        unemployment: true,
+        housingFund: true,
+      },
+    }),
+  );
+  const fund = result.items.find((i) => i.key === 'housingFund');
+  closeTo(fund.base, 3000);
+  closeTo(fund.personalRate, 0.08);
+  closeTo(fund.personalAmount, 240);
+  closeTo(fund.companyAmount, 0);
+  closeTo(result.personalTotal, 0.21 * 5000 + 0.08 * 6733 + 0.01 * 5000 + 240);
+  closeTo(result.netWage, 5000 - result.personalTotal);
+});
+
+// 灵活就业未启用公积金时仍不缴纳
+test('灵活就业未启用公积金仍不缴纳', () => {
+  const result = calculate(
+    makeInput({ wage: 5000, participationType: 'flexible' }),
+  );
+  const fund = result.items.find((i) => i.key === 'housingFund');
+  assert.equal(fund, undefined);
+  // 默认只缴养老、医保
+  const keys = result.items.map((i) => i.key);
+  assert.deepEqual(keys, ['pension', 'medical']);
+});
+
+// 灵活就业自定义：只勾失业
+test('灵活就业只勾选失业', () => {
+  const result = calculate(
+    makeInput({
+      wage: 5000,
+      participationType: 'flexible',
+      flexibleInsurance: {
+        pension: false,
+        medical: false,
+        unemployment: true,
+        housingFund: false,
+      },
+    }),
+  );
+  const keys = result.items.map((i) => i.key);
+  assert.deepEqual(keys, ['unemployment']);
+  closeTo(result.personalTotal, 0.01 * 5000);
+});
+
+// 职工公积金可覆盖基数和比例
+test('职工公积金可覆盖基数和比例', () => {
+  const result = calculate(
+    makeInput({
+      wage: 5000,
+      housingFund: { base: 6000, personalRate: 0.1, companyRate: 0.12 },
+    }),
+  );
+  const fund = result.items.find((i) => i.key === 'housingFund');
+  closeTo(fund.base, 6000);
+  closeTo(fund.personalRate, 0.1);
+  closeTo(fund.companyRate, 0.12);
+  closeTo(fund.personalAmount, 600);
+  closeTo(fund.companyAmount, 720);
+  closeTo(result.personalTotal, 400 + 134.66 + 10 + 600);
+  closeTo(result.companyTotal, 850 + 403.98 + 33.665 + 40 + 14 + 720);
 });
 
 // 参数表可编辑：改费率后结果跟着变

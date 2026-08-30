@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --bg: #f4f6f9;
   --card: #ffffff;
   --border: #e2e6ec;
@@ -24,7 +24,7 @@ body {
 }
 
 .app {
-  max-width: 1100px;
+  max-width: 1540px;
   margin: 0 auto;
   padding: 16px;
 }
@@ -41,6 +41,1347 @@ body {
 .topbar h1 {
   font-size: 20px;
   margin: 0;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-version {
+  color: var(--muted);
+  font-size: 13px;
+  margin-left: 2px;
+}
+
+.region-select {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.company-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+}
+
+.company-current {
+  border: none;
+  background: transparent;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text);
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.company-current:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.company-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 200px;
+  max-width: 320px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  z-index: 60;
+  max-height: 40vh;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.company-menu-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  border-radius: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.company-menu-item:hover {
+  background: var(--primary-soft);
+}
+
+.company-menu-item.selected {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.company-modal {
+  width: min(560px, 92vw);
+}
+
+.add-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.company-name-input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.company-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.company-sort-btn {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.company-sort-btn:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.company-search {
+  flex: 1;
+  min-width: 0;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.company-list {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.company-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  cursor: grab;
+  border-left: 3px solid transparent;
+}
+
+.company-row:active {
+  cursor: grabbing;
+}
+
+.company-row:last-child {
+  border-bottom: none;
+}
+
+.company-row:hover {
+  background: #f8fafc;
+}
+
+.company-list.dragging .company-row:not(.is-dragging):hover {
+  background: transparent;
+}
+
+.company-row.is-dragging {
+  background: #e9edf2;
+}
+
+.company-row.selected {
+  background: var(--primary-soft);
+  border-left-color: var(--primary);
+}
+
+.company-row.drag-over {
+  border-top: 2px solid var(--primary);
+}
+
+.company-drag {
+  cursor: grab;
+  color: var(--muted);
+  user-select: none;
+  font-size: 14px;
+}
+
+.company-drag:active {
+  cursor: grabbing;
+}
+
+.company-drag.disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.company-row-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.context-menu {
+  position: fixed;
+  z-index: 200;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 4px;
+  min-width: 140px;
+}
+
+.context-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+.context-menu button:hover {
+  background: var(--primary-soft);
+}
+
+.context-menu button.active {
+  color: var(--primary);
+  font-weight: 600;
+}
+
+body.drag-lock,
+body.drag-lock * {
+  cursor: none !important;
+}
+
+.drag-fake-cursor {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid #1f2937;
+  border-radius: 50%;
+  background: rgba(31, 41, 55, 0.18);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.65);
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.confirm-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 180;
+}
+
+.confirm-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 18px 20px;
+  width: min(380px, 90vw);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.confirm-card p {
+  margin: 0 0 8px;
+}
+
+.confirm-card .actions {
+  justify-content: flex-end;
+}
+
+.confirm-danger-text {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.error-text {
+  color: var(--red);
+}
+
+.rating-excellent {
+  color: #16a085;
+  font-weight: 600;
+}
+
+.rating-good {
+  color: #2ecc71;
+  font-weight: 600;
+}
+
+.rating-medium {
+  color: #f39c12;
+  font-weight: 600;
+}
+
+.rating-poor {
+  color: #e67e22;
+  font-weight: 600;
+}
+
+.rating-danger {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+.center-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 300;
+  pointer-events: none;
+}
+
+.center-toast-text {
+  display: inline-block;
+  background: rgba(220, 38, 38, 0.92);
+  color: #fff;
+  padding: 14px 24px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.tip {
+  display: inline-flex;
+  margin-left: 4px;
+  cursor: help;
+  color: var(--muted);
+  font-size: 12px;
+  vertical-align: middle;
+}
+
+.tip-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.tip-tip {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 360px;
+  background: #1f2937;
+  color: #fff !important;
+  font-size: 12px;
+  line-height: 1.7;
+  padding: 10px 12px;
+  border-radius: 8px;
+  white-space: pre-line;
+  z-index: 80;
+  text-align: left;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+.tip-wrap:hover .tip-tip {
+  display: block;
+}
+
+/* 短提示（如“终止合同前12个月前”）：窄框、单行 */
+.tip-tip-short {
+  width: auto !important;
+  min-width: 150px !important;
+  white-space: nowrap !important;
+  text-align: center;
+}
+
+.pending-panel .add-btn-field {
+  align-items: flex-end;
+}
+
+.pending-panel .add-btn-right {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+/* 待辞退添加表单：人员/月工资/奖金/工作年限/计入时长 + 添加按钮 */
+.infer-grid {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  gap: 12px;
+  align-items: end;
+}
+
+.infer-grid .field select,
+.infer-grid .field input {
+  width: 40%;
+}
+
+.infer-grid .field:first-child select {
+  width: 60%;
+}
+
+.infer-grid input.add-name-input {
+  width: 100px;
+}
+
+.infer-grid .chain-readonly {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  padding: 6px 4px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  background: #f8fafc;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.infer-grid .bonus-input {
+  width: 40%;
+}
+
+.infer-grid .wage-bonus-labels,
+.infer-grid .wage-bonus-row {
+  display: grid;
+  grid-template-columns: 66px 18px 66px 18px 86px;
+  align-items: center;
+  justify-items: center;
+}
+
+.infer-grid .wage-bonus-labels span {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.infer-grid input.wage-part-input,
+.infer-grid input.bonus-part-input {
+  width: 66px;
+  padding: 6px 4px;
+  text-align: center;
+}
+
+.infer-grid input.avg-part-input {
+  width: 86px;
+  padding: 6px 4px;
+  text-align: center;
+  background: #f4f6f9;
+  font-weight: 600;
+}
+
+.infer-grid input.avg-part-input.avg-manual-red {
+  color: var(--red);
+}
+
+.infer-grid .calc-symbol {
+  font-size: 13px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.infer-grid .pending-remark-field {
+  grid-column: 1 / -1;
+}
+
+.infer-grid select.pending-rating-select {
+  width: 114px;
+}
+
+.infer-grid .pending-remark-textarea {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  padding: 7px 10px;
+  resize: none;
+  overflow: hidden;
+  white-space: normal;
+  word-break: break-all;
+  line-height: 1.45;
+}
+
+.pending-preview {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  justify-content: start;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.preview-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.preview-card span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.preview-card b {
+  color: var(--red);
+  font-size: 16px;
+}
+
+.infer-grid .tenure-chain {
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  align-items: center;
+  justify-items: center;
+  gap: 12px;
+  justify-content: start;
+}
+
+.infer-grid .chain-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.infer-grid .chain-col-label {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.infer-grid .chain-arrow {
+  font-size: 18px;
+  color: var(--muted);
+  line-height: 1;
+}
+
+/* 待辞退链式布局中的入职时间分段框：与通讯录保持一致 */
+.infer-grid .date-segments .seg-year {
+  width: 52px;
+}
+
+.infer-grid .date-segments .seg-month {
+  width: 48px;
+}
+
+.infer-grid .date-segments .seg-day {
+  width: 36px;
+}
+
+.infer-grid .years-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.infer-grid input[type='number'].years-input {
+  width: 40px;
+  padding: 6px 2px;
+  text-align: center;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.infer-grid input[type='number'].years-input::-webkit-inner-spin-button,
+.infer-grid input[type='number'].years-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.infer-grid .months-select {
+  width: 48px;
+}
+
+.infer-grid .tenure-input {
+  width: 80px;
+}
+
+.infer-grid input[type='number'].tenure-input {
+  width: 80px;
+}
+
+.infer-grid .tenure-manual {
+  color: var(--red);
+}
+
+.infer-grid .years-unit {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.pending-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  flex-wrap: nowrap;
+  margin-bottom: 12px;
+}
+
+.pending-head h2 {
+  margin: 0 !important;
+  font-size: 16px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.avg-source-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.avg-source-row > span {
+  white-space: nowrap;
+}
+
+.avg-source-select {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  max-width: 230px;
+  min-width: 0;
+}
+
+.avg-source-select.urban-red {
+  color: #c0392b;
+  font-weight: 600;
+}
+
+.avg-source-select option[value='nonPrivate'],
+.avg-source-select option[value='onPost'] {
+  color: #c0392b;
+}
+
+.avg-source-select option[value='allUnit'] {
+  color: #1f2937;
+}
+
+.avg-source-row input.avg-input {
+  width: 58px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.avg-source-row input.avg-input.avg-manual {
+  color: #c0392b;
+  border-color: #c0392b;
+}
+
+/* 去掉平均工资输入框右侧的上下点击按钮 */
+.avg-source-row input[type='number']::-webkit-inner-spin-button,
+.avg-source-row input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.avg-reset-btn {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--card);
+  color: var(--muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avg-reset-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.avg-triple {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.avg-triple-result {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.contact-drag {
+  cursor: grab;
+  color: var(--muted);
+  user-select: none;
+  font-size: 14px;
+}
+
+.contact-drag:active {
+  cursor: grabbing;
+}
+
+.contacts-panel tbody tr.is-dragging {
+  background: #e9edf2;
+}
+
+.contacts-panel td:first-child {
+  padding-right: 4px;
+}
+
+.contacts-panel td:nth-child(2) {
+  padding-left: 2px;
+  text-align: left;
+}
+
+.pending-drag {
+  cursor: grab;
+  color: var(--muted);
+  user-select: none;
+  font-size: 14px;
+}
+
+.pending-drag:active {
+  cursor: grabbing;
+}
+
+.pending-panel tbody tr.is-dragging {
+  background: #e9edf2;
+}
+
+.pending-panel td:first-child {
+  padding-right: 4px;
+}
+
+.pending-panel td:nth-child(2) {
+  padding-left: 2px;
+  text-align: left;
+}
+
+.sub-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sub-tabs button {
+  border: 1px solid var(--border);
+  background: var(--card);
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.sub-tabs button.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+button.primary {
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+button.danger {
+  background: #fef2f2;
+  color: var(--red);
+  border: 1px solid #f3c1c1;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.red-text {
+  color: var(--red);
+  font-weight: 600;
+}
+
+th {
+  text-align: center !important;
+}
+
+.field input:disabled {
+  background: #f4f6f9;
+  color: var(--text);
+  opacity: 1;
+}
+
+/* 通讯录：输入框/选择框统一样式与宽度 */
+.contacts-panel input,
+.contacts-panel select {
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+/* 通讯录：数字输入框去掉鼠标点击加减按钮 */
+.contacts-panel input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.contacts-panel input[type='number']::-webkit-inner-spin-button,
+.contacts-panel input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.contacts-panel table input[type='date'] {
+  width: 130px;
+}
+
+.contacts-panel table input[type='number'] {
+  width: 100px;
+}
+
+.contacts-panel table input[type='number'].contact-bonus-input {
+  width: 80px;
+}
+
+.contacts-panel table textarea {
+  width: 254px;
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  padding: 7px 10px;
+  resize: none;
+  overflow: hidden;
+  white-space: normal;
+  word-break: break-all;
+  line-height: 1.45;
+  vertical-align: middle;
+}
+
+.contacts-panel table textarea.contact-name-input {
+  width: 80px;
+}
+
+.contacts-panel table select {
+  width: 114px;
+}
+
+/* 评级列：常驻下拉菜单 */
+.contacts-panel table .rating-cell-select {
+  width: 68px;
+  padding: 4px 2px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+}
+
+/* 评级列：保持紧凑宽度，不吸收表格多余空间 */
+.contacts-panel table td:nth-child(11) {
+  width: 80px;
+  max-width: 80px;
+}
+
+/* 通讯录列表：可修改的单元格悬停时显示抓手图标 */
+.contacts-panel table td.cell-name,
+.contacts-panel table td.cell-entry-date,
+.contacts-panel table td.cell-tenure,
+.contacts-panel table td.cell-salary,
+.contacts-panel table td.cell-bonus,
+.contacts-panel table td.cell-avg,
+.contacts-panel table td.cell-remark {
+  cursor: grab;
+}
+
+/* 通讯录列表：板块分隔蓝线（整列贯通，行与行之间留断口） */
+.contacts-panel table th:nth-child(4),
+.contacts-panel table th:nth-child(8),
+.contacts-panel table th:nth-child(11),
+.contacts-panel table th:nth-child(12),
+.contacts-panel table td:nth-child(4),
+.contacts-panel table td:nth-child(8),
+.contacts-panel table td:nth-child(11),
+.contacts-panel table td:nth-child(12) {
+  position: relative;
+}
+
+.contacts-panel table th:nth-child(4)::before,
+.contacts-panel table th:nth-child(8)::before,
+.contacts-panel table th:nth-child(11)::before,
+.contacts-panel table th:nth-child(12)::before,
+.contacts-panel table td:nth-child(4)::before,
+.contacts-panel table td:nth-child(8)::before,
+.contacts-panel table td:nth-child(11)::before,
+.contacts-panel table td:nth-child(12)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--primary);
+}
+
+.contacts-panel .avg-manual-red {
+  color: var(--red);
+  font-weight: 600;
+}
+
+/* 通讯录板块修改弹窗 */
+.block-edit-modal {
+  width: min(480px, 92vw);
+}
+
+.block-edit-modal .block-name-input {
+  width: 100%;
+}
+
+.block-edit-modal .remark-modal-textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.block-edit-modal .block-chain-field {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  align-items: center;
+  justify-items: center;
+  gap: 12px;
+  justify-content: start;
+}
+
+.block-edit-modal .block-chain-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.block-edit-modal .block-chain-col-label {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.block-edit-modal .block-chain-arrow {
+  font-size: 18px;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.block-edit-modal .block-wage-labels,
+.block-edit-modal .block-wage-row {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+}
+
+.block-edit-modal .block-wage-labels,
+.block-edit-modal .block-wage-row {
+  grid-template-columns: 90px 18px 90px 18px 110px;
+}
+
+.block-edit-modal .block-wage-labels span {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.block-edit-modal input.block-wage-input,
+.block-edit-modal input.block-bonus-input {
+  width: 90px;
+  padding: 6px 4px;
+  text-align: center;
+}
+
+.block-edit-modal input.block-avg-input {
+  width: 110px;
+  padding: 6px 4px;
+  text-align: center;
+  background: #f4f6f9;
+  font-weight: 600;
+}
+
+.block-edit-modal input.block-tenure-input {
+  width: 100px;
+  padding: 6px 4px;
+  text-align: center;
+}
+
+.block-edit-modal input.tenure-manual {
+  color: var(--red);
+}
+
+.block-edit-modal .chain-readonly {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+  padding: 6px 4px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  background: #f8fafc;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.block-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 18px;
+  gap: 10px;
+}
+
+.block-actions button {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.block-actions button.primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.contacts-panel td,
+.pending-panel td {
+  padding: 8px 6px;
+  white-space: nowrap;
+}
+
+.pending-panel td:nth-child(2) {
+  width: 64px;
+  max-width: 64px;
+  min-width: 64px;
+  text-align: left;
+  white-space: normal;
+  word-break: break-all;
+  line-height: 1.45;
+}
+
+.pending-panel .wage-manual {
+  color: var(--red);
+}
+
+.pending-panel .bonus-manual {
+  color: var(--red);
+}
+
+/* 待辞退：数字输入框去掉鼠标点击加减按钮，避免多位数错位 */
+.pending-panel input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.pending-panel input[type='number']::-webkit-inner-spin-button,
+.pending-panel input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* 待辞退列表：入职时间~备注等数据列左对齐 */
+.pending-panel td:nth-child(n + 3):nth-child(-n + 12) {
+  text-align: left;
+}
+
+/* 待辞退列表表头与数据列对齐（前 12 列左对齐，操作列右对齐） */
+.pending-panel th {
+  text-align: left !important;
+}
+
+.pending-panel th:nth-child(13) {
+  text-align: right !important;
+}
+
+/* 通讯录列表与待辞退一致：前 12 列左对齐，操作列右对齐 */
+.contacts-panel th {
+  text-align: left !important;
+}
+
+.contacts-panel th:nth-child(13) {
+  text-align: right !important;
+}
+
+.contacts-panel td:nth-child(n + 2):nth-child(-n + 12) {
+  text-align: left;
+}
+
+.contacts-panel td:nth-child(13) {
+  text-align: right;
+}
+
+/* 两个列表：表头标题不允许换行（窗口缩小也不跨行） */
+.contacts-panel th,
+.pending-panel th {
+  white-space: nowrap;
+}
+
+/* 评级、备注：表头与内容居中对齐（其余列保持左对齐） */
+.contacts-panel th:nth-child(11),
+.contacts-panel th:nth-child(12),
+.pending-panel th:nth-child(11),
+.pending-panel th:nth-child(12) {
+  text-align: center !important;
+}
+
+.contacts-panel td:nth-child(11),
+.contacts-panel td:nth-child(12),
+.pending-panel td:nth-child(11),
+.pending-panel td:nth-child(12) {
+  text-align: center !important;
+}
+
+/* 通讯录列表备注：优先压缩的弹性列（窗口变窄时先收缩） */
+.contacts-panel th:nth-child(12),
+.contacts-panel td:nth-child(12) {
+  width: 264px;
+  min-width: 48px;
+  white-space: normal;
+  word-break: break-all;
+  line-height: 1.45;
+}
+
+/* 待辞退列表：数据列宽度均衡，间距均匀（备注列自适应占满剩余） */
+
+.pending-panel th:nth-child(1),
+.pending-panel td:nth-child(1) {
+  width: 28px;
+}
+
+.pending-panel th:nth-child(2),
+.pending-panel td:nth-child(2) {
+  width: 64px;
+}
+
+.pending-panel th:nth-child(3),
+.pending-panel td:nth-child(3) {
+  width: 94px;
+}
+
+.pending-panel th:nth-child(4),
+.pending-panel td:nth-child(4) {
+  width: 64px;
+}
+
+.pending-panel th:nth-child(5),
+.pending-panel td:nth-child(5) {
+  width: 76px;
+}
+
+.pending-panel th:nth-child(6),
+.pending-panel td:nth-child(6) {
+  width: 60px;
+}
+
+.pending-panel th:nth-child(7),
+.pending-panel td:nth-child(7) {
+  width: 78px;
+}
+
+.pending-panel th:nth-child(8),
+.pending-panel td:nth-child(8) {
+  width: 82px;
+}
+
+.pending-panel th:nth-child(9),
+.pending-panel td:nth-child(9) {
+  width: 88px;
+}
+
+.pending-panel th:nth-child(10),
+.pending-panel td:nth-child(10) {
+  width: 84px;
+}
+
+.pending-panel th:nth-child(11),
+.pending-panel td:nth-child(11) {
+  width: 48px;
+}
+
+/* 待辞退列表备注：优先压缩的弹性列（窗口变窄时先收缩） */
+.pending-panel th:nth-child(12),
+.pending-panel td:nth-child(12) {
+  width: 264px;
+  min-width: 48px;
+  white-space: normal;
+  word-break: break-all;
+  line-height: 1.45;
+}
+
+.pending-panel th:nth-child(13),
+.pending-panel td:nth-child(13) {
+  width: 60px;
+}
+
+.contacts-panel .card .field select {
+  width: 150px;
+}
+
+/* 通讯录添加表单：自定义列宽与备注占满 */
+.contact-add-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+  align-items: end;
+}
+
+.contact-add-grid .remark-field {
+  grid-column: 1 / -1;
+}
+
+.contact-add-grid .remark-field textarea {
+  width: 100%;
+  min-height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  padding: 7px 10px;
+  resize: none;
+  overflow: hidden;
+  white-space: normal;
+  word-break: break-all;
+  line-height: 1.45;
+}
+
+.contact-add-grid .add-submit-row {
+  grid-column: 1 / -1;
+  align-items: flex-end;
+}
+
+.contact-add-grid .add-btn-right {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.add-name-input {
+  width: 100px;
+}
+
+.add-date-input {
+  width: 140px;
+}
+
+.add-salary-input {
+  width: 110px;
+}
+
+.add-bonus-input {
+  width: 80px;
+}
+
+.add-rating-select {
+  width: 114px;
+}
+
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+option[value=''] {
+  color: #1f2937;
+}
+
+option[value='excellent'] {
+  color: #16a085;
+}
+
+option[value='good'] {
+  color: #2ecc71;
+}
+
+option[value='medium'] {
+  color: #f39c12;
+}
+
+option[value='poor'] {
+  color: #e67e22;
+}
+
+option[value='danger'] {
+  color: #c0392b;
+}
+
+.avg-wage-display {
+  background: #f4f6f9;
 }
 
 nav {
@@ -146,9 +1487,55 @@ th:first-child {
   text-align: left;
 }
 
+.thead-toolbar-row td {
+  border-bottom: none;
+  padding: 0 8px 3px;
+}
+
+.thead-toolbar-cell {
+  text-align: right;
+}
+
+.recycle-btn {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 5px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.recycle-btn:hover {
+  background: var(--primary-soft);
+}
+
+.recycle-modal {
+  width: min(680px, 92vw);
+}
+
+.recycle-table td,
+.recycle-table th {
+  text-align: left;
+}
+
+.recycle-table th {
+  text-align: center;
+}
+
+.recycle-table td:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.recycle-table button + button {
+  margin-left: 8px;
+}
+
 .summary {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -167,6 +1554,47 @@ th:first-child {
   font-size: 22px;
   font-weight: 600;
   margin-top: 4px;
+}
+
+.editable-value {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+input.value-input {
+  width: 100%;
+  min-width: 0;
+  font-family: inherit;
+  border: none;
+  border-bottom: 1px dashed var(--border);
+  background: transparent;
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--text);
+  outline: none;
+  padding: 2px 4px;
+}
+
+input.value-input:focus {
+  border-bottom-color: var(--primary);
+}
+
+input.value-input.green {
+  color: var(--green);
+}
+
+input.value-input.red {
+  color: var(--red);
+}
+
+.value-unit {
+  font-size: 13px;
+  color: var(--muted);
+  flex: none;
 }
 
 .green {
@@ -195,6 +1623,16 @@ th:first-child {
   color: var(--muted);
   font-size: 13px;
   margin-left: 4px;
+}
+
+.band-note {
+  margin: 4px 0 0;
+}
+
+.band-note-row {
+  grid-column: 1 / -1;
+  white-space: nowrap;
+  margin: 6px 0 0;
 }
 
 .band-help {
@@ -229,9 +1667,136 @@ th:first-child {
 }
 
 /* 试算页顶部输入：月工资 + 参保类型 + 户籍 + 医保档次 至少四列 */
-.calc-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  align-items: start;
+.calc-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.calc-head h2 {
+  margin: 0;
+}
+
+.years-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+input[type='number'].years-input {
+  width: 40px;
+  min-width: 40px;
+  padding: 8px 4px;
+  text-align: center;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input[type='number'].years-input::-webkit-inner-spin-button,
+input[type='number'].years-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.years-unit {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+/* 入职时间分段输入：年 / 月 / 日 */
+.date-segments {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.seg-select {
+  position: relative;
+}
+
+.seg-trigger {
+  width: 100%;
+  padding: 7px 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: inherit;
+  text-align: center;
+  background: #fff;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.seg-popup {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 2px;
+  max-height: 220px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  padding: 6px;
+  z-index: 300;
+  min-width: 104px;
+}
+
+.seg-option {
+  border: none;
+  background: transparent;
+  padding: 5px 4px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.seg-option:hover {
+  background: var(--primary-soft);
+}
+
+.seg-option.selected {
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+.date-segments .seg-year {
+  width: 52px;
+}
+
+.date-segments .seg-day {
+  width: 36px;
+}
+
+.date-segments .seg-month {
+  width: 48px;
+}
+
+.date-segments .seg-dot {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* 计算器内数字输入框去掉鼠标点击加减按钮 */
+.calc-grid input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.calc-grid input[type='number']::-webkit-inner-spin-button,
+.calc-grid input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .wage-input {
@@ -249,6 +1814,300 @@ th:first-child {
 
 .injury-select {
   width: 100%;
+}
+
+/* 灵活就业公积金设置 */
+.flexible-extras {
+  margin-top: 4px;
+}
+
+/* 灵活就业参保险种勾选 */
+.flexible-insurance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.field-label {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.housing-toggle {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.housing-toggle.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.housing-settings {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  max-width: 720px;
+  margin-top: 10px;
+}
+
+.housing-settings .rate-input {
+  width: 180px;
+  max-width: 100%;
+}
+
+.housing-settings.three-cols {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.base-row .base-fixed-input {
+  width: 74px;
+  min-width: 0;
+}
+
+.housing-warning {
+  color: var(--red);
+  margin-top: 10px;
+}
+
+.housing-warnings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+.housing-warnings p {
+  margin: 0;
+}
+
+/* 公积金设置区（职工 / 灵活就业通用） */
+.housing-fund-settings {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+
+.base-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.checkbox input {
+  width: auto;
+}
+
+/* 弹窗 */
+.modal-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px 22px;
+  width: min(720px, 92vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+}
+
+.modal-card h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.modal-head h2 {
+  margin: 0;
+}
+
+.modal-close {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.modal-close:hover {
+  background: #fef2f2;
+}
+
+.modal-card h3 {
+  margin: 16px 0 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.modal-card .actions {
+  justify-content: flex-end;
+}
+
+.sync-sections {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  margin-bottom: 8px;
+}
+
+.sync-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 8px;
+}
+
+.sync-head h3 {
+  margin: 0;
+}
+
+.sync-toggle-all {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sync-toggle-all.checked {
+  background: var(--primary-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.provider-hint {
+  margin: -4px 0 12px;
+}
+
+.sync-url-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.sync-platform-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.sync-refresh {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  cursor: pointer;
+  font-size: 14px;
+  height: 38px;
+  white-space: nowrap;
+}
+
+.sync-refresh:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.sync-url-row .field {
+  flex: 0 0 240px;
+}
+
+.sync-url-row select {
+  height: 38px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.sync-url-input {
+  height: 38px;
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.sync-status.ok {
+  color: var(--green);
+}
+
+.sync-status.err {
+  color: var(--red);
+}
+
+/* 试算按钮 + 齿轮 */
+.nav-calc {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--card);
+}
+
+.nav-calc button {
+  border: none;
+  background: transparent;
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.nav-calc .nav-calc-main.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.nav-calc .nav-gear-btn {
+  border-left: 1px solid var(--border);
+  padding: 8px 10px;
+  font-size: 15px;
+}
+
+.nav-gear-btn:hover {
+  background: #eef2ff;
+  color: var(--primary);
 }
 
 /* 工伤行业类别：两行显示的自定义下拉框 */
@@ -429,8 +2288,301 @@ th:first-child {
 /* 政策参数页：每个险种类别按输入内容长短自动排布，至少 4 列 */
 .param-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 14px 18px;
+}
+
+/* 政策参数：左侧类别、右侧数值（行内布局） */
+.param-grid .field,
+.param-group .field {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  margin-left: 0;
+}
+
+.param-grid .field span:not(.rate-input),
+.param-group .field span:not(.rate-input) {
+  flex: 0 1 auto;
+  min-width: 0;
+  white-space: normal;
+  line-height: 1.35;
+}
+
+/* 数值输入框：适合约 5 位数 */
+.param-grid input[type='number'],
+.param-group input[type='number'] {
+  width: 76px;
+  flex: none;
+}
+
+/* 政策参数：只读输入框（如失业下限跟随最低工资） */
+.param-group input[readonly] {
+  background: #f4f6f9;
+  color: var(--text);
+}
+
+/* 政策参数：数字输入框去掉上下加减按键 */
+.param-grid input[type='number'],
+.param-group input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.param-grid input[type='number']::-webkit-inner-spin-button,
+.param-grid input[type='number']::-webkit-outer-spin-button,
+.param-group input[type='number']::-webkit-inner-spin-button,
+.param-group input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* 百分比输入框：适合约 2 位数 */
+.param-grid .rate-input,
+.param-group .rate-input {
+  width: 64px;
+  flex: none;
+}
+
+.param-grid .rate-input input,
+.param-group .rate-input input {
+  width: 42px;
+  flex: none;
+  padding: 6px 4px;
+  text-align: center;
+}
+
+.param-grid .rate-input select,
+.param-group .rate-input select {
+  width: 100%;
+  padding: 6px 4px;
+}
+
+/* 政策参数分组：蓝色圆角边框 */
+.param-group {
+  border: 1px solid rgba(37, 99, 235, 0.35);
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow:
+    0 0 12px rgba(37, 99, 235, 0.18),
+    inset 0 0 12px rgba(37, 99, 235, 0.06);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px 18px;
+  margin-bottom: 14px;
+}
+
+/* 平均工资年份下拉 */
+.param-group .avg-year-select {
+  width: 78px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  flex: none;
+}
+
+/* ⚙️ 弹窗内的年份单元格：单击加链接、双击访问、有链接变色 */
+.avg-year-grid .year-link-year {
+  cursor: pointer;
+  padding: 2px 0;
+  border-radius: 6px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.avg-year-grid .year-link-year:hover {
+  background: var(--primary-soft);
+}
+
+.avg-year-grid .year-link-year.has-link {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+/* 年份链接编辑弹窗 */
+.link-editor-card {
+  width: min(420px, 92vw);
+}
+
+.link-editor-card .field {
+  margin: 0 0 12px;
+}
+
+.link-editor-card input[type='text'] {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.year-link-year {
+  cursor: pointer;
+  padding: 2px 0;
+  border-radius: 6px;
+}
+
+.year-link-year:hover {
+  background: var(--primary-soft);
+}
+
+.year-link-year.has-link {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.avg-year-link-grid input[type='text'] {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+/* 平均工资 ⚙️ 按钮 */
+.param-group .avg-gear {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--primary);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  align-self: end;
+  justify-self: start;
+}
+
+.param-group .avg-gear:hover {
+  background: var(--primary-soft);
+}
+
+/* 平均工资按年份设置弹窗 */
+.avg-modal {
+  width: min(780px, 94vw);
+}
+
+.avg-year-grid {
+  display: grid;
+  grid-template-columns: 64px repeat(4, minmax(110px, 1fr));
+  gap: 6px 10px;
+  max-height: 58vh;
+  overflow-y: auto;
+  align-items: center;
+}
+
+.avg-year-grid.cols-3 {
+  grid-template-columns: 64px repeat(3, minmax(110px, 1fr));
+}
+
+.avg-year-grid.cols-1 {
+  grid-template-columns: 64px minmax(220px, 1fr);
+}
+
+.avg-year-head {
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.avg-year-label {
+  text-align: center;
+  font-size: 13px;
+}
+
+.avg-year-grid input[type='number'] {
+  width: 100%;
+  padding: 6px 6px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  text-align: center;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.avg-year-grid input[type='number']::-webkit-inner-spin-button,
+.avg-year-grid input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* 医保下的子板块标题（如“生育”） */
+.param-sub-title {
+  margin: 18px 0 10px;
+  font-size: 15px;
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* 独立分组并排（如医保一档/二档左右并排，仍是两个独立组） */
+.param-group-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.param-group-row .param-group {
+  flex: 1 1 280px;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+/* 政策参数板块：2px 实线彩色边框（不模糊） */
+.section-basic {
+  --section-color: #2563eb;
+}
+
+.section-pension {
+  --section-color: #7c3aed;
+}
+
+.section-medical {
+  --section-color: #16a34a;
+}
+
+.section-maternity {
+  --section-color: #7c3aed;
+}
+
+.section-unemployment {
+  --section-color: #ea580c;
+}
+
+.section-injury {
+  --section-color: #dc2626;
+}
+
+.section-housing {
+  --section-color: #0891b2;
+}
+
+.section-basic,
+.section-pension,
+.section-medical,
+.section-maternity,
+.section-unemployment,
+.section-injury,
+.section-housing {
+  border: 2px solid var(--section-color);
+  border-radius: 12px;
+}
+
+/* 板块内的依据：同色浅色虚线框（子区层级） */
+.section-basic .basis,
+.section-pension .basis,
+.section-medical .basis,
+.section-maternity .basis,
+.section-unemployment .basis,
+.section-injury .basis,
+.section-housing .basis {
+  border: 1px dashed color-mix(in srgb, var(--section-color) 45%, transparent);
+  border-radius: 10px;
+  padding: 10px 12px;
 }
 
 .injury-grid {
@@ -446,6 +2598,25 @@ th:first-child {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+.injury-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.injury-head .rate-input {
+  width: auto;
+  flex: none;
+}
+
+.injury-head .rate-input input {
+  width: 70px;
+  flex: none;
+  padding: 5px 6px;
+  text-align: center;
 }
 
 .injury-name {
@@ -465,20 +2636,35 @@ th:first-child {
   min-width: 0;
 }
 
+.rate-input select {
+  width: 100%;
+  min-width: 0;
+}
+
 .rate-suffix {
   color: var(--muted);
   font-weight: 600;
   flex: none;
 }
 
-/* 依据链接编辑：名称 | 网址 | 发布时间 | 访问 | 删除 */
+/* 依据链接编辑：名称 | 网址 | 发布时间 | 有效期 | 访问 | 删除 */
 .basis-grid {
   display: grid;
-  grid-template-columns: minmax(150px, 1.1fr) minmax(200px, 1.6fr) 150px auto auto;
+  grid-template-columns: minmax(150px, 1.1fr) minmax(200px, 1.6fr) 150px minmax(290px, 1fr) auto auto;
   gap: 6px 8px;
   align-items: center;
   width: 100%;
   margin-bottom: 6px;
+}
+
+/* 缴费基数模块内的固定政策依据行（融入模块、横跨整行） */
+.basis-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(150px, 1.1fr) minmax(200px, 1.6fr) 150px minmax(290px, 1fr) auto;
+  gap: 6px 8px;
+  align-items: center;
+  width: 100%;
 }
 
 .basis-publish-header {
@@ -487,14 +2673,250 @@ th:first-child {
   font-size: 12px;
 }
 
+/* 依据列表：日期内容在列内居中，与表头文字对齐 */
+.basis-grid .date-seg {
+  justify-self: center;
+}
+
+.basis-grid .basis-validity-range {
+  justify-content: center;
+}
+
 .basis-name-input,
 .basis-url-input,
-.basis-date-input {
+.basis-date-input,
+.basis-validity-input {
   padding: 6px 8px;
   font-size: 13px;
   width: 100%;
   border: 1px solid var(--border);
   border-radius: 6px;
+}
+
+/* 有效期：起始 ~ 结束 */
+.basis-validity-range {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+}
+
+.basis-validity-range .basis-validity-input {
+  width: 132px;
+  flex: none;
+}
+
+.basis-validity-status {
+  font-size: 12px;
+  font-weight: 600;
+  flex: none;
+  min-width: 28px;
+  text-align: center;
+}
+
+.basis-validity-status.status-valid {
+  color: var(--green);
+}
+
+.basis-validity-status.status-expired {
+  color: var(--red);
+}
+
+/* 分段日期输入：无输入框外观，默认 0000-00-00 */
+.date-seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding: 6px 8px;
+  font-size: 14px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.date-seg-part {
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0;
+  cursor: default;
+  caret-color: transparent;
+  font-size: inherit;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  color: var(--text);
+}
+
+.date-seg-part.year {
+  width: 4ch;
+}
+
+.date-seg-part.month,
+.date-seg-part.day {
+  width: 2ch;
+}
+
+.date-seg-part::placeholder {
+  color: #000000;
+}
+
+/* 正在编辑的段始终显示蓝色选中效果（无文字竖线、不因输入消失） */
+.date-seg-part:focus {
+  background-color: #4a6cf7;
+  color: #ffffff;
+  border-radius: 2px;
+}
+
+.date-seg-part:focus::placeholder {
+  color: #ffffff;
+}
+
+.date-seg-part::selection {
+  background-color: #4a6cf7;
+  color: #ffffff;
+}
+
+/* 最低工资政策组：只读显示 + ⚙️ 管理弹窗 */
+.minwage-display {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.minwage-gear {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.minwage-gear:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+/* 最低工资模块的有效期下拉框：足够宽，显示完整起止日期 */
+.minwage-period-select {
+  width: 220px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  flex: none;
+}
+
+.minwage-modal {
+  width: min(820px, 92vw);
+  max-height: 82vh;
+  overflow-y: auto;
+}
+
+.minwage-edit-card {
+  width: min(460px, 90vw);
+}
+
+.minwage-edit-card .field input {
+  width: 100%;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+}
+
+.minwage-edit-card .field input:focus {
+  border-color: var(--primary);
+}
+
+.minwage-grid {
+  display: grid;
+  grid-template-columns: minmax(90px, 0.7fr) 112px minmax(250px, 1fr) 100px 90px auto;
+  gap: 4px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.minwage-head {
+  display: flex;
+  justify-content: center;
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* ⚙️ 弹窗内：表头与下方内容水平居中对齐 */
+.minwage-grid .minwage-name,
+.minwage-grid input[type="number"] {
+  text-align: center;
+}
+
+.minwage-grid .date-seg {
+  justify-self: center;
+}
+
+.minwage-grid .basis-validity-range {
+  justify-content: center;
+}
+
+.minwage-grid .minwage-ops {
+  justify-content: center;
+}
+
+.minwage-name {
+  color: var(--primary);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.minwage-name-cell {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.minwage-name-input {
+  width: 90px;
+}
+
+.minwage-url-input {
+  flex: 1;
+  min-width: 120px;
+}
+
+.minwage-ops {
+  display: flex;
+  gap: 4px;
+}
+
+.date-seg-invalid .date-seg-part:focus {
+  background-color: #4a6cf7;
+  color: #ffffff;
+}
+
+.date-seg-sep {
+  color: #b9c0cc;
+}
+
+.date-seg-invalid {
+  border-color: var(--red);
+  background: #fff5f5;
+}
+
+.date-seg-invalid .date-seg-part {
+  color: var(--red);
+}
+
+/* 日期文本校验失败标红 */
+.basis-date-input.date-invalid,
+.basis-validity-input.date-invalid {
+  border-color: var(--red);
+  background: #fff5f5;
 }
 
 .basis-del {
@@ -515,6 +2937,7 @@ th:first-child {
   padding: 5px 12px;
   cursor: pointer;
   font-size: 13px;
+  margin-left: auto;
 }
 
 .saved-tip {
@@ -534,6 +2957,11 @@ th:first-child {
 
 .card-head h2 {
   margin: 0;
+}
+
+/* 通讯录人员列表：标题与回收站按钮同一行，按钮靠右 */
+.contacts-list-head {
+  justify-content: space-between;
 }
 
 .period-fields {
@@ -565,6 +2993,7 @@ th:first-child {
   font-weight: 600;
 }
 
-.basis-date-input {
+.basis-date-input,
+.basis-validity-input {
   font-size: 14px;
 }

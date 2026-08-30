@@ -22,6 +22,21 @@ export interface SourceLink {
   url: string;
   /** 政策发布时间（YYYY-MM-DD，可留空） */
   publishDate?: string;
+  /** 政策有效期起（YYYY-MM-DD，可留空） */
+  validityStart?: string;
+  /** 政策有效期止（YYYY-MM-DD，可留空） */
+  validityEnd?: string;
+}
+
+/** 最低工资政策组：按有效期分组，含名称/网址/发布时间和工资数值 */
+export interface MinimumWageGroup {
+  name: string;
+  url: string;
+  publishDate?: string;
+  validityStart?: string;
+  validityEnd?: string;
+  minimumWage: number;
+  minimumPartTimeWage: number;
 }
 
 /** 通用有效期：起止日期 + 发布时间 */
@@ -74,14 +89,36 @@ export interface InsuranceParams {
   version: string;
   /** 最低工资（元/月） */
   minimumWage: number;
-  /** 平均工资（元/年，仅作参考展示） */
+  /** 最低兼职（元/小时） */
+  minimumPartTimeWage: number;
+  /** 最低工资模块内的固定依据（独立存储） */
+  minimumWageBasis?: SourceLink;
+  /** 最低工资政策组（⚙️ 维护，按有效期分组） */
+  minimumWageGroups?: MinimumWageGroup[];
+  /** 平均工资（元/年，按年份保存，可切换不同年度口径） */
   averageWage: {
-    /** 城镇非私营单位就业人员平均工资 */
-    urbanNonPrivate: number;
-    /** 城镇非私营单位在岗职工平均工资 */
-    urbanNonPrivateOnPost: number;
-    /** 城镇私营单位就业人员平均工资 */
-    urbanPrivate: number;
+    /** 城镇非私营/在岗/私营 当前生效年份（下拉选择） */
+    year: string;
+    /** 全口径 当前生效年份（下拉选择） */
+    yearAllUnit: string;
+    /** 按年份保存的四项平均工资 */
+    byYear: Record<
+      string,
+      {
+        /** 城镇非私营单位就业人员平均工资 */
+        urbanNonPrivate: number;
+        /** 城镇非私营单位在岗职工平均工资 */
+        urbanNonPrivateOnPost: number;
+        /** 城镇私营单位就业人员平均工资 */
+        urbanPrivate: number;
+        /** 全口径城镇单位就业人员平均工资 */
+        allUnit: number;
+        /** 城镇非私营组该年份的政策链接（每年最多一条） */
+        link?: { url: string; remark: string };
+        /** 全口径组该年份的政策链接（每年最多一条） */
+        linkAllUnit?: { url: string; remark: string };
+      }
+    >;
   };
   /** 养老保险 */
   pension: {
@@ -92,6 +129,8 @@ export interface InsuranceParams {
     flexibleRateNonDeep: number; // 非深户灵活就业费率（20%）
     baseMin: number;             // 缴费基数下限
     baseMax: number;             // 缴费基数上限
+    /** 缴费基数模块内的固定依据（独立存储，与上方依据列表无关） */
+    baseBasis?: SourceLink;
   };
   /** 医疗保险 */
   medical: {
@@ -102,6 +141,8 @@ export interface InsuranceParams {
     flexibleRate: number;      // 灵活就业个人（8%）
     baseMin: number;
     baseMax: number;
+    /** 缴费基数模块内的固定依据 */
+    baseBasis?: SourceLink;
   };
   /** 生育保险（个人不缴） */
   maternity: {
@@ -116,6 +157,8 @@ export interface InsuranceParams {
     flexibleRate: number;  // 灵活就业个人（1%）
     baseMin: number;
     baseMax: number;
+    /** 缴费基数模块内的固定依据 */
+    baseBasis?: SourceLink;
   };
   /** 工伤保险（个人不缴） */
   injury: {
@@ -145,6 +188,66 @@ export interface CalcInput {
   household: HouseholdType;
   medicalTier: MedicalTier;
   injuryClass: InjuryClass;
+  /**
+   * 职工公积金（可选覆盖）：基数可与工资隔离，个人/公司比例可单独设置。
+   * 不传时使用政策参数中的默认比例，基数 = 工资。
+   */
+  housingFund?: {
+    /** 公积金缴费基数（元），可与工资不同 */
+    base: number;
+    personalRate: number;
+    companyRate: number;
+  };
+  /**
+   * 灵活就业人员公积金（可选）：基数可与工资隔离，比例最高 24%。
+   * 比例或基数为 0 表示不缴纳。
+   */
+  flexibleHousingFund?: {
+    /** 公积金缴费基数（元），可与工资不同 */
+    base: number;
+    /** 缴费比例（0.24 表示 24%） */
+    rate: number;
+  };
+  /**
+   * 灵活就业自定义参保险种（默认勾选养老、医保）。
+   * 不传时按默认：养老/医保缴，失业/公积金不缴。
+   */
+  flexibleInsurance?: {
+    pension: boolean;
+    medical: boolean;
+    unemployment: boolean;
+    housingFund: boolean;
+  };
+}
+
+/** 公积金默认设置（⚙️ 里配置，用于职工 / 灵活就业的初始值） */
+export interface HousingFundDefaults {
+  employee: {
+    /** true = 缴费基数默认跟随工资；false = 使用 fixedBase */
+    followWage: boolean;
+    fixedBase: number;
+    personalRate: number;
+    companyRate: number;
+  };
+  flexible: {
+    followWage: boolean;
+    fixedBase: number;
+    rate: number;
+  };
+}
+
+/** 试算页默认值（⚙️ 设置里配置） */
+export interface CalculatorDefaults {
+  participationType: ParticipationType;
+  household: HouseholdType;
+  medicalTier: MedicalTier;
+  injuryClass: InjuryClass;
+}
+
+/** 应用设置：⚙️ 里包含的各个板块 */
+export interface AppSettings {
+  calculator: CalculatorDefaults;
+  housingFund: HousingFundDefaults;
 }
 
 /** 单个险种的计算结果 */

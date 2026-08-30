@@ -45,10 +45,20 @@ const INJURY_REDUCED_SOURCE: SourceLink = {
 export const DEFAULT_PARAMS: InsuranceParams = {
   version: '2026-08（取自社保成本.xlsx）',
   minimumWage: 2520,
+  minimumPartTimeWage: 0,
+  // 最低工资政策组：必须存在于默认值中，否则加载时会被 mergeParams 丢弃
+  minimumWageGroups: [],
   averageWage: {
-    urbanNonPrivate: 191367,
-    urbanNonPrivateOnPost: 193881,
-    urbanPrivate: 99220,
+    year: '2026',
+    yearAllUnit: '2026',
+    byYear: {
+      '2026': {
+        urbanNonPrivate: 191367,
+        urbanNonPrivateOnPost: 193881,
+        urbanPrivate: 99220,
+        allUnit: 0, // 待补充：全口径城镇单位就业人员平均工资
+      },
+    },
   },
   pension: {
     personalRate: 0.08,

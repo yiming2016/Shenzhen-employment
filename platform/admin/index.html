@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>平台管理后台</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: 'Microsoft YaHei', system-ui, sans-serif;
+        background: #f4f6f9;
+        color: #1f2937;
+        font-size: 14px;
+      }
+      .container { max-width: 1000px; margin: 0 auto; padding: 20px; }
+      h1 { font-size: 20px; }
+      .card {
+        background: #fff;
+        border: 1px solid #e2e6ec;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+      input, select, textarea, button {
+        padding: 8px 10px;
+        border: 1px solid #e2e6ec;
+        border-radius: 8px;
+        font-size: 14px;
+      }
+      input, select, textarea { min-width: 160px; }
+      button { background: #fff; cursor: pointer; }
+      button.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
+      button.danger { color: #dc2626; border-color: #f3c1c1; }
+      table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+      th, td { border-bottom: 1px solid #e2e6ec; padding: 8px; text-align: left; }
+      .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+      .tabs button.active { background: #2563eb; color: #fff; border-color: #2563eb; }
+      .hidden { display: none; }
+      .msg { color: #059669; font-weight: 600; }
+      .err { color: #dc2626; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>平台管理后台</h1>
+      <div id="login" class="card">
+        <div class="row">
+          <input id="loginUser" placeholder="用户名" />
+          <input id="loginPass" type="password" placeholder="密码" />
+          <button class="primary" onclick="login()">登录</button>
+        </div>
+        <p id="loginMsg" class="err"></p>
+      </div>
+
+      <div id="app" class="hidden">
+        <div class="tabs">
+          <button id="tabChannelsBtn" class="active" onclick="showTab('channels')">财会公司渠道</button>
+          <button id="tabAdsBtn" onclick="showTab('ads')">广告</button>
+          <button id="tabStatsBtn" onclick="showTab('stats')">统计</button>
+          <button onclick="logout()">退出登录</button>
+        </div>
+
+        <div id="tab-channels">
+          <div class="card">
+            <h2>新增/编辑渠道</h2>
+            <input id="chName" placeholder="公司名称" />
+            <input id="chParamsUrl" placeholder="参数地址（policy-params.json）" style="min-width: 320px" />
+            <input id="chLogo" placeholder="Logo 地址（选填）" />
+            <input id="chExpiresAt" type="datetime-local" />
+            <div class="row" style="margin-top: 8px">
+              <label><input id="chEnabled" type="checkbox" checked /> 启用</label>
+              <button class="primary" onclick="saveChannel()">保存渠道</button>
+              <button onclick="resetChannelForm()">清空</button>
+            </div>
+            <p id="chMsg" class="msg"></p>
+          </div>
+          <div class="card">
+            <h2>渠道列表</h2>
+            <table>
+              <thead><tr><th>名称</th><th>参数地址</th><th>启用</th><th>到期时间</th><th>操作</th></tr></thead>
+              <tbody id="channelsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tab-ads" class="hidden">
+          <div class="card">
+            <h2>新增/编辑广告</h2>
+            <input id="adTitle" placeholder="广告标题" />
+            <input id="adImage" placeholder="图片地址（选填）" style="min-width: 300px" />
+            <input id="adLink" placeholder="跳转链接" style="min-width: 300px" />
+            <input id="adPages" placeholder="投放页面，逗号分隔（home/params/ad）" style="min-width: 300px" />
+            <input id="adStartAt" type="datetime-local" />
+            <input id="adEndAt" type="datetime-local" />
+            <div class="row" style="margin-top: 8px">
+              <label><input id="adEnabled" type="checkbox" checked /> 启用</label>
+              <button class="primary" onclick="saveAd()">保存广告</button>
+              <button onclick="resetAdForm()">清空</button>
+            </div>
+            <p id="adMsg" class="msg"></p>
+          </div>
+          <div class="card">
+            <h2>广告列表</h2>
+            <table>
+              <thead><tr><th>标题</th><th>链接</th><th>页面</th><th>启用</th><th>操作</th></tr></thead>
+              <tbody id="adsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="tab-stats" class="hidden">
+          <div class="card">
+            <h2>点击统计</h2>
+            <p id="statsTotal"></p>
+            <table>
+              <thead><tr><th>广告 ID</th><th>点击次数</th></tr></thead>
+              <tbody id="statsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API = '';
+      let token = localStorage.getItem('adminToken') || '';
+      let editingChannel = null;
+      let editingAd = null;
+
+      function authHeaders() {
+        return { 'content-type': 'application/json', authorization: 'Bearer ' + token };
+      }
+      async function api(path, method = 'GET', body) {
+        const res = await fetch(API + path, {
+          method,
+          headers: authHeaders(),
+          body: body ? JSON.stringify(body) : undefined,
+        });
+        if (res.status === 401) {
+          token = '';
+          localStorage.removeItem('adminToken');
+          location.reload();
+          throw new Error('未登录');
+        }
+        return res.json();
+      }
+
+      async function login() {
+        const res = await fetch(API + '/api/admin/login', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({
+            username: document.getElementById('loginUser').value,
+            password: document.getElementById('loginPass').value,
+          }),
+        });
+        const data = await res.json();
+        if (data.token) {
+          token = data.token;
+          localStorage.setItem('adminToken', token);
+          location.reload();
+        } else {
+          document.getElementById('loginMsg').innerText = '用户名或密码错误';
+        }
+      }
+
+      function showTab(name) {
+        document.getElementById('tabChannelsBtn').className = name === 'channels' ? 'active' : '';
+        document.getElementById('tabAdsBtn').className = name === 'ads' ? 'active' : '';
+        document.getElementById('tabStatsBtn').className = name === 'stats' ? 'active' : '';
+        document.getElementById('tab-channels').classList.toggle('hidden', name !== 'channels');
+        document.getElementById('tab-ads').classList.toggle('hidden', name !== 'ads');
+        document.getElementById('tab-stats').classList.toggle('hidden', name !== 'stats');
+        if (name === 'channels') loadChannels();
+        if (name === 'ads') loadAds();
+        if (name === 'stats') loadStats();
+      }
+
+      async function loadChannels() {
+        const list = await api('/api/admin/channels');
+        localStorage.setItem('channelsCache', JSON.stringify(list));
+        document.getElementById('channelsBody').innerHTML = list
+          .map(
+            (c) =>
+              `<tr>
+                <td>${c.name}</td>
+                <td style="max-width: 300px; word-break: break-all">${c.paramsUrl}</td>
+                <td>${c.enabled ? '是' : '否'}</td>
+                <td>${c.expiresAt ? new Date(c.expiresAt).toLocaleString() : '长期'}</td>
+                <td><button onclick="editChannel('${c.id}')">编辑</button>
+                    <button class="danger" onclick="deleteChannel('${c.id}')">删除</button></td>
+              </tr>`,
+          )
+          .join('');
+      }
+
+      function editChannel(id) {
+        const list = JSON.parse(localStorage.getItem('channelsCache') || '[]');
+        const c = list.find((x) => x.id === id);
+        if (!c) return;
+        editingChannel = c;
+        document.getElementById('chName').value = c.name || '';
+        document.getElementById('chParamsUrl').value = c.paramsUrl || '';
+        document.getElementById('chLogo').value = c.logo || '';
+        document.getElementById('chExpiresAt').value = c.expiresAt
+          ? new Date(c.expiresAt).toISOString().slice(0, 16)
+          : '';
+        document.getElementById('chEnabled').checked = !!c.enabled;
+      }
+
+      async function saveChannel() {
+        const body = {
+          name: document.getElementById('chName').value.trim(),
+          paramsUrl: document.getElementById('chParamsUrl').value.trim(),
+          logo: document.getElementById('chLogo').value.trim(),
+          enabled: document.getElementById('chEnabled').checked,
+          expiresAt: document.getElementById('chExpiresAt').value
+            ? new Date(document.getElementById('chExpiresAt').value).getTime()
+            : null,
+        };
+        if (!body.name || !body.paramsUrl) {
+          document.getElementById('chMsg').innerText = '请填写名称和参数地址';
+          return;
+        }
+        if (editingChannel) {
+          await api('/api/admin/channels/' + editingChannel.id, 'PUT', body);
+        } else {
+          await api('/api/admin/channels', 'POST', body);
+        }
+        document.getElementById('chMsg').innerText = '已保存';
+        resetChannelForm();
+        loadChannels();
+      }
+
+      function resetChannelForm() {
+        editingChannel = null;
+        ['chName', 'chParamsUrl', 'chLogo', 'chExpiresAt'].forEach(
+          (id) => (document.getElementById(id).value = ''),
+        );
+        document.getElementById('chEnabled').checked = true;
+      }
+
+      async function deleteChannel(id) {
+        if (!confirm('确认删除该渠道？')) return;
+        await api('/api/admin/channels/' + id, 'DELETE');
+        loadChannels();
+      }
+
+      async function loadAds() {
+        const list = await api('/api/admin/ads');
+        localStorage.setItem('adsCache', JSON.stringify(list));
+        document.getElementById('adsBody').innerHTML = list
+          .map(
+            (a) =>
+              `<tr>
+                <td>${a.title}</td>
+                <td style="max-width: 260px; word-break: break-all">${a.link}</td>
+                <td>${(a.pages || []).join(', ')}</td>
+                <td>${a.enabled ? '是' : '否'}</td>
+                <td><button onclick="editAd('${a.id}')">编辑</button>
+                    <button class="danger" onclick="deleteAd('${a.id}')">删除</button></td>
+              </tr>`,
+          )
+          .join('');
+      }
+
+      function editAd(id) {
+        const list = JSON.parse(localStorage.getItem('adsCache') || '[]');
+        const a = list.find((x) => x.id === id);
+        if (!a) return;
+        editingAd = a;
+        document.getElementById('adTitle').value = a.title || '';
+        document.getElementById('adImage').value = a.image || '';
+        document.getElementById('adLink').value = a.link || '';
+        document.getElementById('adPages').value = (a.pages || []).join(',');
+        document.getElementById('adStartAt').value = a.startAt
+          ? new Date(a.startAt).toISOString().slice(0, 16)
+          : '';
+        document.getElementById('adEndAt').value = a.endAt
+          ? new Date(a.endAt).toISOString().slice(0, 16)
+          : '';
+        document.getElementById('adEnabled').checked = !!a.enabled;
+      }
+
+      async function saveAd() {
+        const body = {
+          title: document.getElementById('adTitle').value.trim(),
+          image: document.getElementById('adImage').value.trim(),
+          link: document.getElementById('adLink').value.trim(),
+          pages: document
+            .getElementById('adPages')
+            .value.split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
+          enabled: document.getElementById('adEnabled').checked,
+          startAt: document.getElementById('adStartAt').value
+            ? new Date(document.getElementById('adStartAt').value).getTime()
+            : null,
+          endAt: document.getElementById('adEndAt').value
+            ? new Date(document.getElementById('adEndAt').value).getTime()
+            : null,
+        };
+        if (!body.title || !body.link) {
+          document.getElementById('adMsg').innerText = '请填写标题和跳转链接';
+          return;
+        }
+        if (editingAd) {
+          await api('/api/admin/ads/' + editingAd.id, 'PUT', body);
+        } else {
+          await api('/api/admin/ads', 'POST', body);
+        }
+        document.getElementById('adMsg').innerText = '已保存';
+        resetAdForm();
+        loadAds();
+      }
+
+      function resetAdForm() {
+        editingAd = null;
+        ['adTitle', 'adImage', 'adLink', 'adPages', 'adStartAt', 'adEndAt'].forEach(
+          (id) => (document.getElementById(id).value = ''),
+        );
+        document.getElementById('adEnabled').checked = true;
+      }
+
+      async function deleteAd(id) {
+        if (!confirm('确认删除该广告？')) return;
+        await api('/api/admin/ads/' + id, 'DELETE');
+        loadAds();
+      }
+
+      async function loadStats() {
+        const s = await api('/api/admin/stats');
+        document.getElementById('statsTotal').innerText = '总点击：' + s.totalClicks;
+        document.getElementById('statsBody').innerHTML = Object.entries(s.byAd)
+          .map(([id, n]) => `<tr><td>${id}</td><td>${n}</td></tr>`)
+          .join('');
+      }
+
+      function logout() {
+        token = '';
+        localStorage.removeItem('adminToken');
+        location.reload();
+      }
+
+      if (token) {
+        document.getElementById('login').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        loadChannels();
+      }
+    </script>
+  </body>
+</html>
