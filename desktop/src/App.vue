@@ -9,6 +9,9 @@ import type { AppSettings, InsuranceParams, SourceLink } from '../../core/types'
 import CalculatorPanel from './components/CalculatorPanel.vue';
 import ParamsPanel from './components/ParamsPanel.vue';
 import SettingsModal from './components/SettingsModal.vue';
+import PartTimePanel from './components/PartTimePanel.vue';
+import DispatchPanel from './components/DispatchPanel.vue';
+import OutsourcePanel from './components/OutsourcePanel.vue';
 import PolicySyncModal, {
   type PolicySyncSettings,
 } from './components/PolicySyncModal.vue';
@@ -21,7 +24,38 @@ import type { Company, Contact, PendingLayoff } from '../../core/business';
 import { computed } from 'vue';
 
 const tab = ref<'calc' | 'params' | 'severance' | 'about' | 'ad'>('calc');
+const calcSubTab = ref<
+  'fulltime' | 'contacts' | 'parttime' | 'dispatch' | 'outsource'
+>('fulltime');
+const calcSubTabNames: Record<string, string> = {
+  fulltime: '全职',
+  contacts: '通讯录',
+  parttime: '兼职',
+  dispatch: '派遣',
+  outsource: '外包',
+};
+const calcSubOpen = ref(true);
+const severanceSubOpen = ref(true);
 const loaded = ref(false);
+
+// 顶栏再次点击“用工/赔偿”：收起或展开子分类栏（从其他分类点进来时正常展开）
+function onCalcNavClick() {
+  if (tab.value === 'calc') {
+    calcSubOpen.value = !calcSubOpen.value;
+  } else {
+    tab.value = 'calc';
+    calcSubOpen.value = true;
+  }
+}
+
+function onSeveranceNavClick() {
+  if (tab.value === 'severance') {
+    severanceSubOpen.value = !severanceSubOpen.value;
+  } else {
+    tab.value = 'severance';
+    severanceSubOpen.value = true;
+  }
+}
 const params = ref<InsuranceParams>(structuredClone(DEFAULT_PARAMS));
 const regionKey = ref('shenzhen');
 const showDefaults = ref(false);
@@ -484,9 +518,9 @@ function openLink(url: string) {
           <button
             :class="{ active: tab === 'calc' }"
             class="nav-calc-main"
-            @click="tab = 'calc'"
+            @click="onCalcNavClick"
           >
-            社保
+            用工
           </button>
           <button
             class="nav-gear-btn"
@@ -516,7 +550,7 @@ function openLink(url: string) {
           <button
             :class="{ active: tab === 'severance' }"
             class="nav-calc-main"
-            @click="tab = 'severance'"
+            @click="onSeveranceNavClick"
           >
             赔偿
           </button>
@@ -534,12 +568,38 @@ function openLink(url: string) {
     </header>
 
     <main v-if="loaded">
-      <CalculatorPanel
-        v-if="tab === 'calc'"
-        :params="params"
-        :calculator-defaults="settings.calculator"
-        :housing-fund-defaults="settings.housingFund"
-      />
+      <template v-if="tab === 'calc'">
+        <div v-show="calcSubOpen" class="sub-tabs">
+          <button
+            v-for="key in ['fulltime', 'contacts', 'parttime', 'dispatch', 'outsource']"
+            :key="key"
+            :class="{ active: calcSubTab === key }"
+            @click="calcSubTab = key"
+          >
+            {{ calcSubTabNames[key] }}
+          </button>
+        </div>
+        <CalculatorPanel
+          v-if="calcSubTab === 'fulltime'"
+          :params="params"
+          :calculator-defaults="settings.calculator"
+          :housing-fund-defaults="settings.housingFund"
+        />
+        <PartTimePanel
+          v-else-if="calcSubTab === 'parttime'"
+          :params="params"
+        />
+        <DispatchPanel
+          v-else-if="calcSubTab === 'dispatch'"
+        />
+        <OutsourcePanel
+          v-else-if="calcSubTab === 'outsource'"
+        />
+        <section v-else class="card">
+          <h2>{{ calcSubTabNames[calcSubTab] }}</h2>
+          <p class="note">内容待添加，敬请期待。</p>
+        </section>
+      </template>
       <ParamsPanel
         v-else-if="tab === 'params'"
         :params="params"
@@ -556,6 +616,7 @@ function openLink(url: string) {
         :deleted-contacts="deletedContacts"
         :deleted-pending-layoffs="deletedPendingLayoffs"
         :company-id="companyKey"
+        :sub-open="severanceSubOpen"
       />
       <section v-else-if="tab === 'about'" class="card">
         <h2>说明</h2>

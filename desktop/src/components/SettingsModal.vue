@@ -151,9 +151,9 @@ function save() {
       </div>
 
       <h3>公积金</h3>
-      <div class="param-grid">
+      <div class="param-grid housing-defaults-grid">
         <label class="field">
-          <span>职工：默认缴费基数</span>
+          <span>职工基数</span>
           <div class="base-row">
             <label class="checkbox">
               <input type="checkbox" v-model="draft.housingFund.employee.followWage" />
@@ -169,21 +169,21 @@ function save() {
           </div>
         </label>
         <label class="field">
-          <span>职工：公司比例（默认）</span>
+          <span>公司比例</span>
           <RateInput
             v-model="draft.housingFund.employee.companyRate"
             :options="housingCompanyOptions"
           />
         </label>
         <label class="field">
-          <span>职工：个人比例（默认）</span>
+          <span>个人比例</span>
           <RateInput
             v-model="draft.housingFund.employee.personalRate"
             :options="housingPersonalOptions"
           />
         </label>
         <label class="field">
-          <span>灵活就业：默认缴费基数</span>
+          <span>灵活基数</span>
           <div class="base-row">
             <label class="checkbox">
               <input type="checkbox" v-model="draft.housingFund.flexible.followWage" />
@@ -199,8 +199,11 @@ function save() {
           </div>
         </label>
         <label class="field">
-          <span>灵活就业：比例（默认，最高 24%）</span>
-          <RateInput v-model="draft.housingFund.flexible.rate" :options="housingFlexibleOptions" />
+          <span title="最高 24%">灵活比例</span>
+          <RateInput
+            v-model="draft.housingFund.flexible.rate"
+            :options="housingFlexibleOptions"
+          />
         </label>
       </div>
       <p v-if="draft.housingFund.employee.personalRate * 100 > 12" class="note housing-warning">

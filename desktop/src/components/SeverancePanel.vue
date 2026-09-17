@@ -30,6 +30,8 @@ const props = defineProps<{
   deletedContacts: Contact[];
   deletedPendingLayoffs: PendingLayoff[];
   companyId: string;
+  /** 顶栏再次点击“赔偿”时收起/展开子分类栏（内容保留） */
+  subOpen: boolean;
 }>();
 
 const subTab = ref<'calc' | 'pending' | 'contacts'>('calc');
@@ -225,7 +227,7 @@ function fmtClean(n: number): string {
 
 <template>
   <div class="severance-panel">
-    <div class="sub-tabs">
+    <div v-show="subOpen" class="sub-tabs">
       <button :class="{ active: subTab === 'calc' }" @click="subTab = 'calc'">计算器</button>
       <button :class="{ active: subTab === 'pending' }" @click="subTab = 'pending'">待辞退</button>
       <button :class="{ active: subTab === 'contacts' }" @click="subTab = 'contacts'">通讯录</button>

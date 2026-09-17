@@ -1,4 +1,4 @@
-﻿const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
@@ -6,7 +6,12 @@ const { execFile } = require('child_process');
 
 // 冒烟测试使用独立的用户数据目录，避免污染真实数据
 if (process.env.SMOKE_TEST === '1') {
-  app.setPath('userData', path.join(os.tmpdir(), `sz-shebao-smoke-${Date.now()}`));
+  app.setPath(
+    'userData',
+    process.env.SMOKE_REAL_USERDATA
+      ? path.join(os.homedir(), 'AppData', 'Roaming', 'shenzhen-shebao-calculator')
+      : path.join(os.tmpdir(), `sz-shebao-smoke-${Date.now()}`),
+  );
 }
 // 版本守卫测试：指定独立用户数据目录
 if (process.env.SZ_TEST_USERDATA) {
@@ -224,6 +229,339 @@ function createWindow() {
     win.webContents.on('did-finish-load', async () => {
       // 等 Vue 挂载完成再操作界面
       await new Promise((resolve) => setTimeout(resolve, 1200));
+      if (process.env.SMOKE_DETAIL_ALIGN) {
+        const d = await win.webContents.executeJavaScript(`
+          JSON.stringify({
+            th1: getComputedStyle(
+              document.querySelector('.detail-table th:nth-child(1)'),
+            ).textAlign,
+            th2: getComputedStyle(
+              document.querySelector('.detail-table th:nth-child(2)'),
+            ).textAlign,
+            th7: getComputedStyle(
+              document.querySelector('.detail-table th:nth-child(7)'),
+            ).textAlign,
+            td1: getComputedStyle(
+              document.querySelector('.detail-table tbody tr td:nth-child(1)'),
+            ).textAlign,
+            td2: getComputedStyle(
+              document.querySelector('.detail-table tbody tr td:nth-child(2)'),
+            ).textAlign,
+            valueInputSpinner: (() => {
+              const el = document.querySelector('input.value-input');
+              return el
+                ? getComputedStyle(el, '::-webkit-inner-spin-button').appearance
+                : null;
+            })(),
+            householdTip: (() => {
+              const span = [...document.querySelectorAll('.field span')].find((s) =>
+                s.innerText.includes('户籍'),
+              );
+              const tip = span ? span.querySelector('.tip-tip') : null;
+              return tip ? tip.innerText : '';
+            })(),
+            summaryWidth: (() => {
+              const summary = document.querySelector('.summary');
+              const card = document.querySelector('.summary .card');
+              if (!summary || !card) return null;
+              const sr = summary.getBoundingClientRect();
+              const cr = card.getBoundingClientRect();
+              const parent = summary.parentElement;
+              const pr = parent ? parent.getBoundingClientRect() : sr;
+              return {
+                cardW: Math.round(cr.width),
+                summaryW: Math.round(sr.width),
+                summaryRatio:
+                  Math.round((sr.width / pr.width) * 100) + '%',
+                colGap: (() => {
+                  const cards = [...document.querySelectorAll('.summary .card')];
+                  if (cards.length < 2) return null;
+                  const c1 = cards[0].getBoundingClientRect();
+                  const c2 = cards[1].getBoundingClientRect();
+                  // 板块应紧贴：第二列卡片左缘与第一列卡片右缘重合
+                  return Math.round(c2.left - c1.right);
+                })(),
+              };
+            })(),
+          })
+        `);
+        console.log('DETAIL_ALIGN:', d);
+      }
+      if (process.env.SMOKE_DEDUCT) {
+        const d = await win.webContents.executeJavaScript(`
+          (async () => {
+            try {
+            const cardEls = [...document.querySelectorAll('.summary .card')];
+            const cards = cardEls.map((c) =>
+              (c.querySelector('.label') || {}).innerText.replace(/\\s+/g, ' '),
+            );
+            const cardProbe = cardEls.map((c, i) => ({
+              i,
+              label: (c.querySelector('.label') || {}).innerText || '',
+              hasValue: !!c.querySelector('.value'),
+            }));
+            const personalTotal = (() => {
+              const group = [...document.querySelectorAll('.summary-group')][1];
+              const el = group ? group.querySelectorAll('.sg-cell')[0] : null;
+              return el ? el.querySelector('.value').innerText : '';
+            })();
+            const moduleDiag = (() => {
+              const groups = [...document.querySelectorAll('.summary-group')];
+              return groups.map((g) => {
+                const cells = [...g.querySelectorAll('.sg-cell')];
+                const gr = g.getBoundingClientRect();
+                const labelTops = cells.map(
+                  (c) => c.querySelector('.sg-label').getBoundingClientRect().top,
+                );
+                const valueTops = cells.map((c) =>
+                  (c.querySelector('.value') || c.querySelector('.editable-value'))
+                    .getBoundingClientRect().top,
+                );
+                const overflow = cells.some((c) => {
+                  const v = c.querySelector('.value') || c.querySelector('.editable-value');
+                  const vr = v.getBoundingClientRect();
+                  return vr.right > gr.right + 1 || vr.left < gr.left - 1;
+                });
+                const overflowDetail = cells.map((c) => {
+                  const v = c.querySelector('.value') || c.querySelector('.editable-value');
+                  const vr = v.getBoundingClientRect();
+                  return {
+                    label: (c.querySelector('.sg-label') || {}).innerText || '',
+                    value: v.innerText,
+                    vw: Math.round(vr.width),
+                    gap: Math.round(gr.right - vr.right),
+                  };
+                });
+                return {
+                  cells: cells.length,
+                  labelAligned: Math.max(...labelTops) - Math.min(...labelTops) < 6,
+                  valueAligned: Math.max(...valueTops) - Math.min(...valueTops) < 6,
+                  overflow,
+                  overflowDetail,
+                };
+              });
+            })();
+            const incomeTaxShown = (() => {
+              const el = [...document.querySelectorAll('.sg-4 .sg-cell')][3];
+              return el ? el.querySelector('.value').innerText : '';
+            })();
+            const netAfterTaxShown = (() => {
+              const el = [...document.querySelectorAll('.sg-4 .sg-cell')][4];
+              const input = el ? el.querySelector('.editable-value input') : null;
+              return input ? input.value : '';
+            })();
+            // 验证阶梯税率：月工资 20000
+            const wageInput = document.querySelector('.wage-input');
+            wageInput.value = '20000';
+            wageInput.dispatchEvent(new Event('input'));
+            await new Promise((r) => setTimeout(r, 150));
+            const taxAt20k = [
+              ...document.querySelectorAll('.sg-4 .sg-cell'),
+            ][3].querySelector('.value').innerText;
+            const personalAt20k = [
+              ...document.querySelectorAll('.summary-group')[1].querySelectorAll('.sg-cell'),
+            ][0].querySelector('.value').innerText;
+            wageInput.value = '5000';
+            wageInput.dispatchEvent(new Event('input'));
+            await new Promise((r) => setTimeout(r, 120));
+            // 税后收入反推：目标 15000 -> 月工资自动反算，且 月工资−个人社保−个税 ≈ 15000
+            const netInputEl = [
+              ...document.querySelectorAll('.sg-4 .sg-cell'),
+            ][4].querySelector('.editable-value input');
+            netInputEl.value = '15000';
+            netInputEl.dispatchEvent(new Event('input'));
+            await new Promise((r) => setTimeout(r, 150));
+            const reverseNetDiag = (() => {
+              const cells = [...document.querySelectorAll('.sg-4 .sg-cell')];
+              const parseMoney = (s) =>
+                Number(String(s).replace(/[^\\d.-]/g, ''));
+              const wageV = Number(document.querySelector('.wage-input').value);
+              const personal = parseMoney(
+                cells[1].querySelector('.value').innerText,
+              );
+              const tax = parseMoney(
+                cells[3].querySelector('.value').innerText,
+              );
+              const net = Number(
+                cells[4].querySelector('.editable-value input').value,
+              );
+              return {
+                wage: wageV,
+                personal,
+                tax,
+                net,
+                consistent: Math.abs(wageV - personal - tax - net) < 0.02,
+              };
+            })();
+            netInputEl.value = '4205.34';
+            netInputEl.dispatchEvent(new Event('input'));
+            await new Promise((r) => setTimeout(r, 120));
+            const reverseWageBack = (() => {
+              const v = Number(document.querySelector('.wage-input').value);
+              return { ok: Math.abs(v - 5000) < 0.01, value: v };
+            })();
+            // 税前收入反推：目标 12000 -> 月工资自动反算，且 月工资−个人社保 ≈ 12000
+            const pretaxInputEl = [
+              ...document.querySelectorAll('.sg-4 .sg-cell'),
+            ][2].querySelector('.editable-value input');
+            pretaxInputEl.value = '12000';
+            pretaxInputEl.dispatchEvent(new Event('input'));
+            await new Promise((r) => setTimeout(r, 150));
+            const reversePretaxDiag = (() => {
+              const cells = [...document.querySelectorAll('.sg-4 .sg-cell')];
+              const parseMoney = (s) =>
+                Number(String(s).replace(/[^\\d.-]/g, ''));
+              const wageV = Number(document.querySelector('.wage-input').value);
+              const personal = parseMoney(
+                cells[1].querySelector('.value').innerText,
+              );
+              const pretax = Number(
+                cells[2].querySelector('.editable-value input').value,
+              );
+              return {
+                wage: wageV,
+                personal,
+                pretax,
+                consistent: Math.abs(wageV - personal - pretax) < 0.02,
+              };
+            })();
+            pretaxInputEl.value = '4205.34';
+            pretaxInputEl.dispatchEvent(new Event('input'));
+            await new Promise((r) => setTimeout(r, 120));
+            const reversePretaxBack = (() => {
+              const v = Number(document.querySelector('.wage-input').value);
+              return { ok: Math.abs(v - 5000) < 0.01, value: v };
+            })();
+            [...document.querySelectorAll('.deduct-gear')][0].click(); // 专项附加 ⚙️
+            await new Promise((r) => setTimeout(r, 120));
+            const modalOpen = !!document.querySelector('.deduct-modal');
+            const specialValue = (document.querySelector(
+              '.deduct-modal .deduct-module-value',
+            ) || {}).innerText;
+            const masterGone = !document.querySelector('.deduct-module .switch');
+            const totals = [...document.querySelectorAll('.deduct-module-total')].map(
+              (t) => t.innerText,
+            );
+            const medicalTip = (() => {
+              const item = [...document.querySelectorAll('.deduct-item')].find((it) =>
+                it.innerText.includes('大病医疗'),
+              );
+              const tip = item ? item.querySelector('.tip-tip') : null;
+              return tip ? tip.innerText : '';
+            })();
+            // 打开各模组开关（默认全关）
+            const enableItem = (text) => {
+              const item = [...document.querySelectorAll('.deduct-item')].find((it) =>
+                it.innerText.includes(text),
+              );
+              const s = item ? item.querySelector('.switch input') : null;
+              if (s) {
+                s.checked = true;
+                s.dispatchEvent(new Event('change'));
+              }
+            };
+            ['住房', '60+老人', '3 岁以下', '子女教育', '学历学位', '职业资格', '大病医疗'].forEach(
+              enableItem,
+            );
+            await new Promise((r) => setTimeout(r, 100));
+            const itemCount = document.querySelectorAll('.deduct-grid .deduct-item').length;
+            const annualBox = !!document.querySelector('.deduct-annual');
+            const annualTitle = (document.querySelector('.deduct-annual-title') || {}).innerText;
+            const annualItems = document.querySelectorAll('.deduct-annual .deduct-item').length;
+            // 住房：选择一线租房
+            const rentItem = [...document.querySelectorAll('.deduct-item')].find((it) =>
+              it.innerText.includes('住房'),
+            );
+            const sel1 = rentItem ? rentItem.querySelector('select') : null;
+            if (!sel1) return 'no-rent-select';
+            const rentDefault = sel1.value;
+            sel1.value = 'rent';
+            sel1.dispatchEvent(new Event('change'));
+            await new Promise((r) => setTimeout(r, 80));
+            const rentResult = rentItem.querySelector('.deduct-result').innerText;
+            // 抵扣方式与孩子数量是否同一行
+            const infantItem = [...document.querySelectorAll('.deduct-item')].find((it) =>
+              it.innerText.includes('3 岁以下'),
+            );
+            const countSel = infantItem
+              ? infantItem.querySelector('.deduct-count-select')
+              : null;
+            const methodSel = infantItem
+              ? [...infantItem.querySelectorAll('.deduct-inline')].find((l) =>
+                  l.innerText.includes('抵扣方式'),
+                )
+              : null;
+            const methodSelEl = methodSel ? methodSel.querySelector('select') : null;
+            const sameLine =
+              countSel && methodSelEl
+                ? Math.abs(
+                    countSel.getBoundingClientRect().top -
+                      methodSelEl.getBoundingClientRect().top,
+                  ) < 12
+                : null;
+            const methodWidth = methodSelEl ? methodSelEl.offsetWidth : null;
+            const elderlyItem = [...document.querySelectorAll('.deduct-item')].find((it) =>
+              it.innerText.includes('60+老人'),
+            );
+            const siblingsSel = elderlyItem
+              ? elderlyItem.querySelector('select')
+              : null;
+            const siblingsWidth = siblingsSel ? siblingsSel.offsetWidth : null;
+            const selfPayInput = document.querySelector('.deduct-number');
+            const selfPayWidth = selfPayInput ? selfPayInput.offsetWidth : null;
+            const specialOnlyNoModule =
+              !document.querySelector('.deduct-modal .deduct-module-value');
+            // 关闭弹窗
+            const mc = document.querySelector('.deduct-modal .modal-close');
+            if (mc) mc.click();
+            await new Promise((r) => setTimeout(r, 80));
+            return JSON.stringify({
+              cards,
+              cardProbe,
+              personalTotal,
+              moduleDiag,
+              incomeTaxShown,
+              netAfterTaxShown,
+              taxAt20k,
+              personalAt20k,
+              reverseNetDiag,
+              reverseWageBack,
+              reversePretaxDiag,
+              reversePretaxBack,
+              modalOpen,
+              specialValue,
+              masterGone,
+              totals,
+              medicalTip,
+              itemCount,
+              annualBox,
+              annualTitle,
+              annualItems,
+              rentDefault,
+              rentResult,
+              sameLine,
+              methodWidth,
+              siblingsWidth,
+              selfPayWidth,
+              specialOnlyNoModule,
+              modalClosed: !document.querySelector('.deduct-modal'),
+            });
+            } catch (err) {
+              return JSON.stringify({
+                fatal: String(err),
+                cardProbe:
+                  typeof cardProbe !== 'undefined'
+                    ? cardProbe
+                    : [...document.querySelectorAll('.summary .card')].map((c) => ({
+                        label: (c.querySelector('.label') || {}).innerText || '',
+                        hasValue: !!c.querySelector('.value'),
+                      })),
+              });
+            }
+          })()
+        `);
+        console.log('DEDUCT_CHECK:', d);
+      }
       if (process.env.SMOKE_TAB === 'params') {
         await win.webContents.executeJavaScript(
           `[...document.querySelectorAll('nav button')]
@@ -1236,9 +1574,18 @@ function createWindow() {
             const tenure6Char = inputs[3].value;
             set(inputs[3], 4);
             await new Promise((r) => setTimeout(r, 80));
-            const calcAvgSelector = !!document.querySelector(
-              '.severance-panel .calc-head .avg-source-select',
-            );
+            const calcAvgFixed = (() => {
+              const label = (
+                document.querySelector(
+                  '.severance-panel .calc-head .avg-source-row > span',
+                ) || {}
+              ).innerText || '';
+              return (
+                !document.querySelector(
+                  '.severance-panel .calc-head .avg-source-select',
+                ) && label.includes('广东省全口径城镇单位就业人员平均工资')
+              );
+            })();
             const calcAvgLabel = (
               document.querySelector('.severance-panel .calc-head .avg-source-row > span') || {}
             ).innerText;
@@ -1393,11 +1740,14 @@ function createWindow() {
             set(calcAvgInput, 200000);
             await new Promise((r) => setTimeout(r, 80));
             const calcAvgManualRed = calcAvgInput.classList.contains('avg-manual');
-            // 恢复平均工资来源为城镇非私营（191367），供封顶测试使用
-            setSelect(
-              document.querySelector('.severance-panel .calc-head .avg-source-select'),
-              'nonPrivate',
+            // 点 ⟳ 恢复政策参数值（全口径 9167 元/月），供封顶测试使用
+            const avgResetBtn = document.querySelector(
+              '.severance-panel .calc-head .avg-reset-btn',
             );
+            if (avgResetBtn) avgResetBtn.click();
+            await new Promise((r) => setTimeout(r, 80));
+            // 冒烟环境使用默认参数（全口径为 0），手动设定 10000 元/月测试封顶
+            set(calcAvgInput, 10000);
             await new Promise((r) => setTimeout(r, 80));
             // 触发 3 倍封顶 + 12 年上限 -> 红字提示
             set(inputs[0], 50000);
@@ -1406,12 +1756,14 @@ function createWindow() {
             await new Promise((r) => setTimeout(r, 150));
             const capHintText =
               (document.querySelector('.severance-panel .red-text') || {}).innerText || '';
-            const capHintOk = capHintText.includes('锁定年限（N）为12');
+            const capHintOk =
+              capHintText.includes('锁定工资为30,000元') &&
+              capHintText.includes('年限为12个月');
             const tenureAfterCap = inputs[3].value;
             const calcValuesAfterCap = [
               ...document.querySelectorAll('.severance-panel .preview-card b'),
             ].map((el) => el.innerText);
-            const nPlus1Capped = calcValuesAfterCap[1].includes('621,942.75');
+            const nPlus1Capped = calcValuesAfterCap[1].includes('390,000');
             // 奖金计入计算：月工资 8000 + 奖金 2000 = 10000
             set(inputs[0], 8000);
             set(inputs[1], 2000);
@@ -1489,7 +1841,9 @@ function createWindow() {
             const contactBonusHeader = [
               ...document.querySelectorAll('.contacts-panel thead th'),
             ].some((th) => th.innerText.includes('奖金'));
-            const contactName = document.querySelector('.contacts-panel input[type=text]');
+            const contactName = document.querySelector(
+              '.contacts-panel .add-name-input',
+            );
             contactName.value = '张三';
             contactName.dispatchEvent(new Event('input'));
             await setSeg(
@@ -1959,7 +2313,9 @@ function createWindow() {
             await new Promise((r) => setTimeout(r, 80));
             // 添加李四（评级中等）、王五（未评级），用于下拉过滤与月工资联动测试
             const addContactQuick = (nm, sal, rating) => {
-              const nInput = document.querySelector('.contacts-panel input[type=text]');
+              const nInput = document.querySelector(
+                '.contacts-panel .add-name-input',
+              );
               nInput.value = nm;
               nInput.dispatchEvent(new Event('input'));
               set(
@@ -2108,7 +2464,7 @@ function createWindow() {
               ];
               const cl = [
                 ...document.querySelectorAll(
-                  '.infer-grid .tenure-chain-labels span',
+                  '.infer-grid .tenure-chain .chain-col-label',
                 ),
               ];
               const ci = [
@@ -2129,7 +2485,7 @@ function createWindow() {
                 );
               return JSON.stringify({
                 wage: [0, 2, 4].map((i) => gap(wl[i], wi[i / 2])),
-                chain: [0, 2, 4].map((i) => gap(cl[i], ci[i / 2])),
+                chain: [0, 1, 2].map((i) => gap(cl[i], ci[i])),
               });
             })();
             const contactSegYearWidth = (() => {
@@ -2210,26 +2566,12 @@ function createWindow() {
             })();
             const labelNoWrap =
               avgLabel.scrollWidth <= avgLabel.clientWidth + 1;
-            const avgOptions = [...document.querySelectorAll('.avg-source-select option')].map(
-              (o) => o.innerText,
-            );
-            const avgSelect = document.querySelector('.avg-source-select');
-            setSelect(avgSelect, 'onPost');
-            await new Promise((r) => setTimeout(r, 80));
-            const avgUrbanRed = avgSelect.classList.contains('urban-red');
-            const avgAllUnitOptionColor = (() => {
-              const opt = [...document.querySelectorAll('.avg-source-select option')].find(
-                (o) => o.value === 'allUnit',
-              );
-              return opt ? getComputedStyle(opt).color : '';
-            })();
+            const avgSelectGone = !document.querySelector('.avg-source-select');
+            const avgUrbanRed = false;
+            const avgAllUnitOptionColor = '';
             const avgInput = document.querySelector('.avg-input');
             const avgOnPostValue = avgInput.value;
-            setSelect(avgSelect, 'nonPrivate');
-            await new Promise((r) => setTimeout(r, 80));
             const avgNonPrivateValue = avgInput.value;
-            setSelect(avgSelect, 'onPost');
-            await new Promise((r) => setTimeout(r, 80));
             set(avgInput, 20000);
             await new Promise((r) => setTimeout(r, 80));
             const avgManualRed = avgInput.classList.contains('avg-manual');
@@ -2786,10 +3128,9 @@ function createWindow() {
               yearsThirdBlocked,
               calcValuesAfterTenureEdit,
               tenureManualRed,
-              calcAvgSelector,
+              calcAvgFixed,
               calcAvgLabel,
               calcAvgManualRed,
-              calcWageLabel,
               calcBonusLabel,
               calcYearsLabel,
               calcWageChain,
@@ -2917,7 +3258,7 @@ function createWindow() {
               pendingHeadGap,
               headAlignDiag,
               labelNoWrap,
-              avgOptions,
+              avgSelectGone,
               avgUrbanRed,
               avgAllUnitOptionColor,
               avgOnPostValue,
@@ -3148,6 +3489,29 @@ function createWindow() {
             const pendingWageTip = document.querySelectorAll(
               '.pending-panel .wage-bonus-labels .tip',
             ).length;
+            const pendingSeparators = (() => {
+              const table = document.querySelector('.pending-panel table');
+              if (!table) return null;
+              const row = table.querySelector('tbody tr[data-id]');
+              const out = [];
+              for (const nth of [4, 8, 11, 12]) {
+                const td = row
+                  ? row.querySelector('td:nth-child(' + nth + ')')
+                  : null;
+                const th = table.querySelector(
+                  'thead tr:last-child th:nth-child(' + nth + ')',
+                );
+                const before = td ? getComputedStyle(td, '::before') : null;
+                const thBefore = th ? getComputedStyle(th, '::before') : null;
+                out.push({
+                  col: nth,
+                  tdWidth: before ? before.width : null,
+                  tdBg: before ? before.backgroundColor : null,
+                  thWidth: thBefore ? thBefore.width : null,
+                });
+              }
+              return out;
+            })();
             const pendingWageTipText = (() => {
               const t = document.querySelector('.pending-panel .wage-bonus-labels .tip-tip');
               return t ? t.innerText : '';
@@ -3165,6 +3529,7 @@ function createWindow() {
               pending,
               headAlign,
               pendingWageTip,
+              pendingSeparators,
               pendingWageTipText,
               contactsWageTip,
               contactsWageTipText,
@@ -3249,6 +3614,20 @@ function createWindow() {
           // 忽略
         }
       }, 2000);
+    });
+    // 渲染进程异常（崩溃/被杀）时自动重载，避免白屏
+    let rendererRestarts = 0;
+    win.webContents.on('render-process-gone', (_e, details) => {
+      if (details.reason === 'clean-exit') return;
+      rendererRestarts += 1;
+      if (rendererRestarts > 5) return;
+      setTimeout(() => {
+        try {
+          win.reload();
+        } catch {
+          // 忽略
+        }
+      }, 800);
     });
   }
 }

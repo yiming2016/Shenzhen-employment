@@ -1,6 +1,6 @@
 {
   "name": "shenzhen-shebao-calculator",
-  "version": "1.11.156",
+  "version": "1.11.248",
   "description": "深圳社保成本计算器（桌面 EXE，逻辑可复用于手机 App）",
   "author": "local",
   "private": true,

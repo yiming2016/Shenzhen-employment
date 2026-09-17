@@ -7,6 +7,8 @@ const {
   calculate,
   findWageByNet,
   findWageByCost,
+  findWageByAfterTax,
+  calcIncomeTaxMonthly,
   DEFAULT_PARAMS,
 } = require('../dist/core/engine.js');
 
@@ -192,6 +194,112 @@ test('反解不可行目标返回 0', () => {
   const base = makeInput({ wage: 5000 });
   closeTo(findWageByNet(-1000, base), 0);
   closeTo(findWageByCost(1000, base), 0);
+});
+
+// 个税月度计算：阶梯税率样例
+test('个税月度计算：阶梯税率样例', () => {
+  closeTo(calcIncomeTaxMonthly(5000, 800, 0), 0);
+  // 月应税 3000 -> 年 36000 -> 3% 档
+  closeTo(calcIncomeTaxMonthly(8800, 800, 0), 90);
+  // 月应税 12000 -> 年 144000 -> 10% 档
+  closeTo(calcIncomeTaxMonthly(17800, 800, 0), 990);
+  // 月应税 40000 -> 年 480000 -> 30% 档（专项附加 2000 参与）
+  closeTo(calcIncomeTaxMonthly(50000, 3000, 2000), 7590);
+  // 自定义起征点 3000：月应税 1200 -> 年 14400 -> 3% 档
+  closeTo(calcIncomeTaxMonthly(5000, 800, 0, 3000), 36);
+});
+
+// 反解税后收入：与正算往返一致（深户一档）
+test('反解税后收入：往返一致（深户一档）', () => {
+  const base = makeInput({ wage: 20000, household: 'deep', medicalTier: 1 });
+  const extra = 3000;
+  for (const wage of [8000, 15000, 30000, 60000]) {
+    const r = calculate({ ...base, wage }, DEFAULT_PARAMS);
+    const target =
+      wage -
+      r.personalTotal -
+      calcIncomeTaxMonthly(wage, r.personalTotal, extra);
+    const w = findWageByAfterTax(target, base, DEFAULT_PARAMS, extra);
+    closeTo(w, wage, 1e-3);
+    const back = calculate({ ...base, wage: w }, DEFAULT_PARAMS);
+    closeTo(
+      w -
+        back.personalTotal -
+        calcIncomeTaxMonthly(w, back.personalTotal, extra),
+      target,
+      1e-3,
+    );
+  }
+});
+
+// 反解税后收入：往返一致（非深户二档）
+test('反解税后收入：往返一致（非深户二档）', () => {
+  const base = makeInput({ wage: 10000, household: 'non-deep', medicalTier: 2 });
+  const r = calculate(base, DEFAULT_PARAMS);
+  const target =
+    10000 - r.personalTotal - calcIncomeTaxMonthly(10000, r.personalTotal, 0);
+  const w = findWageByAfterTax(target, base, DEFAULT_PARAMS, 0);
+  closeTo(w, 10000, 1e-3);
+});
+
+// 反解税后收入：目标低于可行下限时返回 0
+test('反解税后收入：不可行目标返回 0', () => {
+  const base = makeInput({ wage: 5000 });
+  closeTo(findWageByAfterTax(-10000, base, DEFAULT_PARAMS, 0), 0);
+});
+
+// 反解税后收入：自定义起征点往返一致
+test('反解税后收入：自定义起征点往返一致', () => {
+  const base = makeInput({ wage: 15000, household: 'deep', medicalTier: 1 });
+  const r = calculate(base, DEFAULT_PARAMS);
+  const target =
+    15000 -
+    r.personalTotal -
+    calcIncomeTaxMonthly(15000, r.personalTotal, 0, 3000);
+  const w = findWageByAfterTax(target, base, DEFAULT_PARAMS, 0, 3000);
+  closeTo(w, 15000, 1e-3);
+});
+
+// 公积金"跟随工资"时，反推必须按候选工资动态取基数（否则正反算不一致）
+test('反解税后收入/用工成本：公积金跟随工资时往返一致', () => {
+  const input = {
+    ...makeInput({ wage: 20000, household: 'deep', medicalTier: 1 }),
+    housingFund: {
+      followWage: true,
+      base: 0,
+      personalRate: 0.12,
+      companyRate: 0.12,
+    },
+  };
+  const r = calculate(input, DEFAULT_PARAMS);
+  const netTarget =
+    20000 - r.personalTotal - calcIncomeTaxMonthly(20000, r.personalTotal, 0);
+  const wNet = findWageByAfterTax(netTarget, input, DEFAULT_PARAMS, 0);
+  closeTo(wNet, 20000, 1e-3);
+  const backNet = calculate({ ...input, wage: wNet }, DEFAULT_PARAMS);
+  closeTo(
+    wNet -
+      backNet.personalTotal -
+      calcIncomeTaxMonthly(wNet, backNet.personalTotal, 0),
+    netTarget,
+    1e-3,
+  );
+  const costTarget = 20000 + r.companyTotal;
+  const wCost = findWageByCost(costTarget, input, DEFAULT_PARAMS);
+  closeTo(wCost, 20000, 1e-3);
+  closeTo(
+    calculate({ ...input, wage: wCost }, DEFAULT_PARAMS).employmentCost,
+    costTarget,
+    1e-3,
+  );
+  const pretaxTarget = 20000 - r.personalTotal;
+  const wPretax = findWageByNet(pretaxTarget, input, DEFAULT_PARAMS);
+  closeTo(wPretax, 20000, 1e-3);
+  closeTo(
+    calculate({ ...input, wage: wPretax }, DEFAULT_PARAMS).netWage,
+    pretaxTarget,
+    1e-3,
+  );
 });
 
 // 灵活就业可选择缴存公积金，基数与工资隔离

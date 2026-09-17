@@ -23,10 +23,13 @@ const year = ref('');
 const month = ref('');
 const day = ref('');
 
-const yearOptions = Array.from(
-  { length: 2050 - props.minYear + 1 },
-  (_, i) => String(props.minYear + i),
-);
+// 年份列表以 2026 为第一项，其余年份从 2027 顺序排到 2050，再接回 minYear~2025
+const yearOptions = [
+  ...Array.from({ length: 2050 - 2026 + 1 }, (_, i) => String(2026 + i)),
+  ...Array.from({ length: 2026 - props.minYear }, (_, i) =>
+    String(props.minYear + i),
+  ),
+];
 const monthOptions = Array.from(
   { length: 12 },
   (_, i) => String(i + 1).padStart(2, '0'),
@@ -86,7 +89,6 @@ function push() {
       class="seg-year"
       :options="yearOptions"
       :columns="3"
-      scroll-to="2020"
     />
     <span class="seg-dot">-</span>
     <SegSelect

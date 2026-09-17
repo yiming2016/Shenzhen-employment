@@ -193,6 +193,8 @@ export interface CalcInput {
    * 不传时使用政策参数中的默认比例，基数 = 工资。
    */
   housingFund?: {
+    /** true = 缴费基数跟随月工资（反算时按候选工资动态取基数）；false = 使用 base */
+    followWage?: boolean;
     /** 公积金缴费基数（元），可与工资不同 */
     base: number;
     personalRate: number;
@@ -203,6 +205,8 @@ export interface CalcInput {
    * 比例或基数为 0 表示不缴纳。
    */
   flexibleHousingFund?: {
+    /** true = 缴费基数跟随月工资（反算时按候选工资动态取基数）；false = 使用 base */
+    followWage?: boolean;
     /** 公积金缴费基数（元），可与工资不同 */
     base: number;
     /** 缴费比例（0.24 表示 24%） */

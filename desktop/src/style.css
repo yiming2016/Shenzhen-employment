@@ -430,6 +430,13 @@ body.drag-lock * {
   text-align: center;
 }
 
+.tip-tip-narrow {
+  width: max-content !important;
+  min-width: 0 !important;
+  white-space: pre-line !important;
+  text-align: center;
+}
+
 .pending-panel .add-btn-field {
   align-items: flex-end;
 }
@@ -974,6 +981,36 @@ th {
 .contacts-panel table td:nth-child(8)::before,
 .contacts-panel table td:nth-child(11)::before,
 .contacts-panel table td:nth-child(12)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--primary);
+}
+
+/* 待辞退列表：同样使用板块分隔蓝线（整列贯通，行与行之间留断口） */
+.pending-panel table th:nth-child(4),
+.pending-panel table th:nth-child(8),
+.pending-panel table th:nth-child(11),
+.pending-panel table th:nth-child(12),
+.pending-panel table td:nth-child(4),
+.pending-panel table td:nth-child(8),
+.pending-panel table td:nth-child(11),
+.pending-panel table td:nth-child(12) {
+  position: relative;
+}
+
+.pending-panel table th:nth-child(4)::before,
+.pending-panel table th:nth-child(8)::before,
+.pending-panel table th:nth-child(11)::before,
+.pending-panel table th:nth-child(12)::before,
+.pending-panel table td:nth-child(4)::before,
+.pending-panel table td:nth-child(8)::before,
+.pending-panel table td:nth-child(11)::before,
+.pending-panel table td:nth-child(12)::before {
   content: '';
   position: absolute;
   left: 0;
@@ -1535,14 +1572,78 @@ th:first-child {
 
 .summary {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px 0;
   margin-bottom: 16px;
+  width: 90%;
+  margin-right: auto;
 }
 
 .summary .card {
   margin: 0;
+  width: auto;
   text-align: center;
+}
+
+/* 个人社保 ➕ 专项附加 ➕ 起征点 🟰 合计抵扣：一个大模块，占 3 格 */
+.summary-group {
+  grid-column: span 3;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  gap: 6px;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px;
+}
+
+/* 公司社保 + 用工成本：两个一组的模块，占 2 格 */
+.summary-group.sg-2 {
+  grid-column: span 2;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* 税后收入公式：月工资 ➖ 个人社保合计 🟰 税前收入 ➖ 个税 🟰 税后收入，占整行 */
+.summary-group.sg-4 {
+  grid-column: span 5;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr auto 1fr;
+}
+
+.sg-cell {
+  text-align: center;
+}
+
+.sg-cell .value,
+.sg-cell .editable-value {
+  white-space: nowrap;
+}
+
+.summary-group .value,
+.summary-group .editable-value input {
+  font-size: 18px;
+}
+
+.sg-label {
+  position: relative;
+  display: inline-block;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.sg-label-icon {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 2px !important;
+}
+
+.sg-symbol {
+  font-size: 20px;
+  text-align: center;
+  color: var(--text);
+  line-height: 1;
 }
 
 .summary .label {
@@ -1579,6 +1680,18 @@ input.value-input {
   padding: 2px 4px;
 }
 
+/* 去掉“用工成本、到手工资”输入框右侧的上下加减键 */
+input.value-input {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input.value-input::-webkit-inner-spin-button,
+input.value-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 input.value-input:focus {
   border-bottom-color: var(--primary);
 }
@@ -1589,6 +1702,234 @@ input.value-input.green {
 
 input.value-input.red {
   color: var(--red);
+}
+
+/* 抵扣金额 ⚙️ 按钮 */
+.summary .deduct-gear {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--primary);
+  border-radius: 6px;
+  padding: 2px 6px;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.summary .deduct-gear:hover {
+  background: var(--primary-soft);
+}
+
+/* 抵扣设置弹窗 */
+.deduct-modal {
+  width: min(760px, 94vw);
+}
+
+.deduct-module {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.deduct-module-label {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.deduct-module-value {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.deduct-module-total {
+  color: var(--text);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.deduct-box-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.deduct-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.deduct-item {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.deduct-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.deduct-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.deduct-inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.deduct-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.deduct-row .deduct-inline select.deduct-select-small {
+  width: 118px;
+}
+
+.deduct-row > select.deduct-select-small {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 5px 6px;
+}
+
+.deduct-row .deduct-inline select.deduct-count-select {
+  width: 46px;
+}
+
+.deduct-inline select.deduct-siblings-select {
+  width: 118px;
+}
+
+.deduct-inline select,
+.deduct-item select {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.deduct-inline input.deduct-number {
+  width: 115px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.deduct-inline input.deduct-number::-webkit-inner-spin-button,
+.deduct-inline input.deduct-number::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.deduct-result {
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* 月度汇算：单独颜色框 */
+.deduct-monthly {
+  border: 1px solid rgba(37, 99, 235, 0.35);
+  background: rgba(37, 99, 235, 0.05);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.deduct-monthly-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* 年度汇算：单独颜色框 */
+.deduct-annual {
+  border: 1px solid rgba(7, 89, 133, 0.4);
+  background: rgba(7, 89, 133, 0.06);
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.deduct-annual-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.deduct-annual-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #075985;
+}
+
+/* 开关按钮 */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 22px;
+  flex: none;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch .slider {
+  position: absolute;
+  inset: 0;
+  background: #cbd5e1;
+  border-radius: 22px;
+  transition: 0.2s;
+  cursor: pointer;
+}
+
+.switch .slider::before {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 3px;
+  bottom: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: 0.2s;
+}
+
+.switch input:checked + .slider {
+  background: var(--primary);
+}
+
+.switch input:checked + .slider::before {
+  transform: translateX(20px);
 }
 
 .value-unit {
@@ -1608,6 +1949,15 @@ input.value-input.red {
 .note {
   color: var(--muted);
   font-size: 13px;
+}
+
+/* 社保明细表：表头与数据列对齐（首列左对齐，其余右对齐） */
+.detail-table th {
+  text-align: right !important;
+}
+
+.detail-table th:first-child {
+  text-align: left !important;
 }
 
 .band {
@@ -1651,7 +2001,7 @@ input.value-input.red {
   bottom: calc(100% + 8px);
   left: 0;
   background: #1f2937;
-  color: #fff;
+  color: #fff !important;
   padding: 10px 14px;
   border-radius: 8px;
   font-size: 12px;
@@ -1788,6 +2138,11 @@ input[type='number'].years-input::-webkit-outer-spin-button {
 }
 
 /* 计算器内数字输入框去掉鼠标点击加减按钮 */
+.calc-grid.grid {
+  /* 固定 4 列：窗口变宽时每格等比例变宽，输入框/下拉宽度跟随窗口缩放 */
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .calc-grid input[type='number'] {
   -moz-appearance: textfield;
   appearance: textfield;
@@ -1799,9 +2154,45 @@ input[type='number'].years-input::-webkit-outer-spin-button {
   margin: 0;
 }
 
-.wage-input {
-  width: 140px;
+.calc-grid .wage-input {
+  width: 34%;
   max-width: 100%;
+}
+
+.wage-field .wage-with-band {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.band-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+}
+
+.band-stack-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.band-stack .band-range {
+  margin-left: 0;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.band-stack .band-help {
+  margin-left: 0;
+}
+
+.medical-tier-select {
+  width: 80%;
 }
 
 .field .segmented {
@@ -1834,6 +2225,91 @@ input[type='number'].years-input::-webkit-outer-spin-button {
   font-size: 13px;
 }
 
+/* 派遣：合同板块 */
+.dispatch-contract-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 14px 16px;
+}
+
+.dispatch-contract-grid input,
+.dispatch-contract-grid textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--card);
+  color: var(--text);
+}
+
+.dispatch-contract-grid textarea {
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.dispatch-job-field {
+  grid-column: 1 / -1;
+}
+
+/* 期限：起止两个日期 + 波浪号 */
+.dispatch-term-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.dispatch-term-tilde {
+  color: var(--muted);
+  font-size: 14px;
+  flex: none;
+}
+
+/* 外包：《外包/承揽合同》 + 假外包真派遣警示 */
+.outsource-fake-warning {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 1px solid var(--red);
+  border-radius: 10px;
+  background: rgba(220, 38, 38, 0.06);
+}
+
+.outsource-fake-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--red);
+  margin-bottom: 6px;
+}
+
+.outsource-fake-title .tip {
+  color: var(--red);
+}
+
+.outsource-fake-line {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text);
+}
+
+.outsource-fake-line + .outsource-fake-line {
+  margin-top: 4px;
+}
+
+/* 派遣合同提示：统一在 ⓘ 右侧弹出，顶部与图标对齐 */
+.dispatch-contract-grid .tip-tip {
+  left: calc(100% + 8px);
+  right: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  width: max-content;
+  max-width: min(420px, calc(100vw - 160px));
+  white-space: pre-line;
+}
+
 .housing-toggle {
   border: 1px solid var(--border);
   background: var(--card);
@@ -1851,20 +2327,29 @@ input[type='number'].years-input::-webkit-outer-spin-button {
 }
 
 .housing-settings {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  max-width: 720px;
-  margin-top: 10px;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 16px;
+  margin-top: 0;
+}
+
+.housing-settings .field {
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
 }
 
 .housing-settings .rate-input {
-  width: 180px;
+  width: 69.3px;
   max-width: 100%;
 }
 
-.housing-settings.three-cols {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+.housing-settings .base-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .base-row .base-fixed-input {
@@ -1890,9 +2375,327 @@ input[type='number'].years-input::-webkit-outer-spin-button {
 
 /* 公积金设置区（职工 / 灵活就业通用） */
 .housing-fund-settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px dashed var(--border);
+}
+
+.housing-note-inline {
+  margin: 0;
+  max-width: 460px;
+}
+
+.housing-fund-settings .housing-warnings {
+  flex-basis: 100%;
+  margin-top: 0;
+}
+
+/* 兼职模块：最低兼职时薪（有效期下拉） + 公式计算（输入框嵌入公式） */
+
+.parttime-wage-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.parttime-period-field select {
+  width: 204px;
+}
+
+.parttime-period-field {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.parttime-wage-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.parttime-wage-display span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.parttime-wage-display strong {
+  font-size: 16px;
+  color: var(--primary);
+}
+
+/* 公式区：输入框直接嵌入公式 */
+.parttime-formulas {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.parttime-formulas > .parttime-formula-box:not(.parttime-week-box) > .pf-grid {
+  justify-content: center;
+}
+
+.parttime-formulas > .parttime-formula-box:not(.parttime-week-box) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 118px;
+}
+
+.parttime-ot-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.parttime-ot-title {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.parttime-formula-box {
+  width: fit-content;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+}
+
+/* 未超时时：超时工作 与 日薪 合成一个框，共用同一组列，上下永远对齐 */
+.parttime-vertical-box .pf-grid {
+  row-gap: 8px;
+}
+
+/* 未超时（超时时薪开）：仿“每周工作天数”框，两条公式各用一个运算符 */
+.noover-ops {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.noover-ops .pwb-op {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+}
+
+.pwb-body .pwb-term .pf-control .pf-input {
+  width: 56px;
+  min-width: 56px;
+  padding: 5px 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  text-align: center;
+}
+
+/* 每周工作时长 / 周薪 合并框：每周工作天数放最前，✖️ 一次 */
+.parttime-week-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pwb-factor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.pwb-factor .pf-input {
+  width: 52px;
+  padding: 5px 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  text-align: center;
+}
+
+.pwb-body {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  column-gap: 10px;
+  row-gap: 12px;
+  align-items: center;
+}
+
+.pwb-op-mid {
+  gap: 10px;
+}
+
+.pwb-term {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.pwb-op {
+  font-size: 18px;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.pwb-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.pwb-result {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.pwb-result.red {
+  color: var(--red);
+}
+
+.pf-grid {
+  display: grid;
+  align-items: center;
+  justify-content: start;
+  column-gap: 6px;
+  row-gap: 2px;
+}
+
+.pf-void {
+  display: block;
+}
+
+.pf-name {
+  position: relative;
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.pf-name .tip-wrap {
+  position: absolute;
+  left: 100%;
+  top: 0;
+  margin-left: 2px;
+}
+
+.pf-name .tip {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.pf-emoji {
+  font-size: 18px;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.pf-op-mid {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.pf-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+}
+
+.pf-control .pf-input {
+  width: 56px;
+  min-width: 56px;
+  padding: 5px 4px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  text-align: center;
+}
+
+.pf-control .pf-input.red {
+  color: var(--red);
+  border-color: var(--red);
+  font-weight: 600;
+}
+
+.pf-control .pf-input::-webkit-inner-spin-button,
+.pf-control .pf-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.pf-readonly {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.pf-result {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 30px;
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+.pf-result .pf-note {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+.pf-result.red {
+  color: var(--red);
+}
+
+.pf-grid .tip.red {
+  color: var(--red);
+}
+
+.pf-note {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
 }
 
 .base-row {
@@ -2357,6 +3160,34 @@ input[type='number'].years-input::-webkit-outer-spin-button {
 .param-group .rate-input select {
   width: 100%;
   padding: 6px 4px;
+}
+
+/* 公积金默认设置：5 项一行排列（职工基数/公司比例/个人比例/灵活基数/灵活比例） */
+.housing-defaults-grid {
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 1fr);
+  gap: 8px 10px;
+}
+
+.housing-defaults-grid .field > span {
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.housing-defaults-grid .rate-input {
+  width: 52px;
+}
+
+.housing-defaults-grid .base-row {
+  gap: 6px;
+}
+
+.housing-defaults-grid .base-row input[type='number'] {
+  width: 52px;
+  padding: 6px 4px;
+}
+
+.housing-defaults-grid .checkbox {
+  white-space: nowrap;
 }
 
 /* 政策参数分组：蓝色圆角边框 */

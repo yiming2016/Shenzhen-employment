@@ -171,11 +171,16 @@ export function calculate(
   // ---------- 住房公积金（比例可自行调整） ----------
   if (input.participationType === 'employee') {
     const hf = input.housingFund;
+    const hfBase = hf
+      ? hf.followWage
+        ? wage
+        : Math.max(0, hf.base)
+      : wage;
     items.push(
       item(
         'housingFund',
         '公积金',
-        hf ? Math.max(0, hf.base) : wage,
+        hfBase,
         hf ? hf.personalRate : params.housingFund.personalRate,
         hf ? hf.companyRate : params.housingFund.companyRate,
       ),
@@ -185,9 +190,13 @@ export function calculate(
     flexibleInsurance &&
     flexibleInsurance.housingFund &&
     input.flexibleHousingFund.rate > 0 &&
-    input.flexibleHousingFund.base > 0
+    (input.flexibleHousingFund.followWage
+      ? wage > 0
+      : input.flexibleHousingFund.base > 0)
   ) {
-    const base = Math.max(0, input.flexibleHousingFund.base);
+    const base = input.flexibleHousingFund.followWage
+      ? wage
+      : Math.max(0, input.flexibleHousingFund.base);
     const rate = input.flexibleHousingFund.rate;
     items.push(
       item('housingFund', '公积金（灵活就业）', base, rate, 0, '个人自愿缴存'),
@@ -222,6 +231,78 @@ export function findWageByNet(
   return invertMonotonic(
     (w) => calculate({ ...input, wage: w }, params).netWage,
     targetNetWage,
+  );
+}
+
+/** 个税起征点（元/月），随政策调整 */
+export const TAX_THRESHOLD = 5000;
+
+/**
+ * 个人所得税（月度）：按年度综合所得阶梯税率折算到月。
+ * 应纳税所得额(月) = max(0, 月工资 − 起征点 − 个人社保合计 − 专项附加月合计)。
+ * 与界面正算共用同一函数，保证正算/反算规则一致。
+ */
+export function calcIncomeTaxMonthly(
+  wage: number,
+  personalTotal: number,
+  extraMonthly = 0,
+  threshold = TAX_THRESHOLD,
+): number {
+  const taxableMonthly = Math.max(
+    0,
+    wage - threshold - (personalTotal + extraMonthly),
+  );
+  const annual = taxableMonthly * 12;
+  let rate = 0;
+  let quick = 0;
+  if (annual <= 36000) {
+    rate = 0.03;
+    quick = 0;
+  } else if (annual <= 144000) {
+    rate = 0.1;
+    quick = 2520;
+  } else if (annual <= 300000) {
+    rate = 0.2;
+    quick = 16920;
+  } else if (annual <= 420000) {
+    rate = 0.25;
+    quick = 31920;
+  } else if (annual <= 660000) {
+    rate = 0.3;
+    quick = 52920;
+  } else if (annual <= 960000) {
+    rate = 0.35;
+    quick = 85920;
+  } else {
+    rate = 0.45;
+    quick = 181920;
+  }
+  return (annual * rate - quick) / 12;
+}
+
+/**
+ * 反解月工资：给定目标"税后收入"，返回满足条件的月工资。
+ * 税后收入 = 月工资 − 个人社保合计 − 个人所得税，随工资严格单调递增
+ * （个人费率合计 + 个税边际税率 < 100%），因此可用二分法求反函数，
+ * 与正算共用同一套 calculate + calcIncomeTaxMonthly，不会出现两套规则。
+ */
+export function findWageByAfterTax(
+  targetAfterTax: number,
+  input: CalcInput,
+  params: InsuranceParams = DEFAULT_PARAMS,
+  extraMonthly = 0,
+  threshold = TAX_THRESHOLD,
+): number {
+  return invertMonotonic(
+    (w) => {
+      const r = calculate({ ...input, wage: w }, params);
+      return (
+        w -
+        r.personalTotal -
+        calcIncomeTaxMonthly(w, r.personalTotal, extraMonthly, threshold)
+      );
+    },
+    targetAfterTax,
   );
 }
 
