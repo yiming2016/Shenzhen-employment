@@ -10,7 +10,7 @@ timeout /t 1 /nobreak >nul
 
 cd /d "%~dp0"
 
-set "APP_DIR=%~dp0..\软件\电脑版\release\win-unpacked"
+set "APP_DIR=%~dp0..\软件\电脑版\win-unpacked"
 
 echo 正在构建 core ...
 call npm run build:core

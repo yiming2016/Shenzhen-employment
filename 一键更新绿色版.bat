@@ -9,7 +9,7 @@ echo 正在构建绿色版（约 2~3 分钟）...
 call npm run dist
 
 echo 正在同步到软件目录...
-set "APP_DIR=%~dp0..\软件\电脑版\release\win-unpacked"
+set "APP_DIR=%~dp0..\软件\电脑版\win-unpacked"
 if exist "%APP_DIR%" rmdir /S /Q "%APP_DIR%"
 xcopy /E /I /Y /Q "release\win-unpacked" "%APP_DIR%" >nul
 rmdir /S /Q "release"
